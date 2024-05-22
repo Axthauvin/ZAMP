@@ -11,6 +11,7 @@ const log = require('electron-log');
 const fs = require('fs');
 const { info } = require('console');
 
+const phpFolder = path.resolve(path.join(app.getAppPath(), "bin", "php"));
 const phpVersionsPath = path.resolve(path.join(app.getAppPath(), "src", "php", 'versions.json'));
 
 const configPath = path.resolve(path.join(app.getAppPath(), "src", 'config.json'));
@@ -257,6 +258,7 @@ ipcMain.on('asynchronous-message', function (evt, messageObj) {
       case 'get-projects' : evt.sender.send('get-projects', projects); break;
       case 'getApacheversion' : evt.sender.send('getApacheversion', apacheConfig); break;
       case 'openApacheFolder' : openExplorer(apacheFolder); break;
+      case 'openPHPFolder' : openExplorer(phpFolder); break;
       break;
       
        

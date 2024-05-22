@@ -422,3 +422,8 @@ document.getElementById("open-apache-folder").addEventListener('click', (event) 
   ipcRenderer.send('asynchronous-message', 'openApacheFolder');
 });
 
+
+document.getElementById("open-php-folder").addEventListener('click', (event) => {
+  ipcRenderer.send('asynchronous-message', 'openPHPFolder');
+});
+

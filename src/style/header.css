@@ -54,7 +54,7 @@ header .area .context-menu{
     
     opacity: 0;
     transition: max-height .3s, opacity 0s;
-   
+    min-width: 100%;
     
 
 }
