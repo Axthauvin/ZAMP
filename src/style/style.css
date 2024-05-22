@@ -1,0 +1,180 @@
+:root {
+    --border-color : #272727;
+    --border-size: 2px;
+    --border-radius : 10px;
+    --left-size : 40%;
+    --info-color: #808285;
+    --button-color :  #1b1920;
+    --validate-color: #03c988;
+    --buttons-color: #8b5cf6; 
+    --selected-color: #1b1920;
+}
+
+@font-face {
+    font-family: 'Lato';
+    src: url('./fonts/Lato-Regular.woff') format('woff'), /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+         url('./fonts/Lato-Regular.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5, Opera 10+, Safari 3—5 */
+}
+
+@font-face {
+    font-family: 'Nunito';
+    src: url('./fonts/Nunito-Regular.ttf') format('woff'), /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+         url('./fonts/Nunito-Regular.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5, Opera 10+, Safari 3—5 */
+}
+
+body {
+    background-color: #111015;
+    color: white;
+    margin: 0;
+    font-family: 'Lato';
+}
+
+
+main {
+    padding: 3rem;
+    display: flex;
+    margin-right: 0rem;
+    box-sizing: border-box;
+    width: 100%;
+    gap: 20px;
+}
+
+.main-1 {
+    padding-bottom: 0;
+}
+
+.main-2 {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+main #left {
+    max-width: var(--left-size);
+    box-sizing: border-box;
+    min-width: var(--left-size);
+}
+
+
+main #right {
+    width: -webkit-fill-available;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 12px;
+    color: white;
+    outline: none;
+    border: none;
+    font-size: 1rem;
+    border-radius: var(--border-radius);
+    text-align: center;
+    width: fit-content;
+    vertical-align: middle;
+    align-items: center;
+    display: flex;
+    font-family: "Nunito";
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: bold;
+    height: fit-content;
+}
+
+#browser {
+    background-color: var(--validate-color) !important
+}
+
+#open-close, .actions button, .card-headers button, #create-new  {
+    background-color: var(--buttons-color);
+}
+
+#main-buttons {
+    display: flex;
+    gap: 2rem;
+}
+
+.stop {
+    background-color: #f65c5c !important;
+}
+
+
+
+.actions {
+    margin-top: 2rem;
+    box-sizing: border-box;
+    display: flex;
+    border: var(--border-size) solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--button-color);
+    width: 90%;
+    flex-direction: column;
+}
+
+
+.actions .area {
+    display: flex;
+    width: 100%;
+    border: none;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+}
+
+.actions h2 {
+    font-size: 14px;
+    margin: 0;
+    font-weight: normal;
+}
+
+.actions button {
+    font-size: 14px;
+}
+
+.actions p {
+    margin: 0;
+    margin-top: 0.5rem;
+    font-size: 12px;
+}
+
+.actions .col {
+    width: 60%;
+    box-sizing: border-box;
+}
+
+.shortcut {
+    background-color: #48484a;
+    border-radius: 5px;
+    padding: 3px;
+    margin-right: 2px;
+    font-size: inherit;
+    color: rgb(169, 169, 169);
+}
+
+.actions .area + .area {
+    border-top: 1px solid var(--border-color);
+}
+
+#extensionsContainer {
+    padding: 0;
+}
+
+
+.item {
+    padding: 10px;
+    border-radius: var(--border-radius);
+    transition: 0.3s;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.item:hover {
+    
+    background-color: var(--selected-color);
+}
+
+
+.card-headers {
+    display: flex;
+    justify-content: space-between;
+}
+

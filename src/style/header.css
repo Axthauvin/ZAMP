@@ -1,0 +1,152 @@
+
+header {
+    background-color: #1b1920;
+    box-sizing: border-box;
+    display: flex;
+    width: 100%;
+    border: 2px solid var(--border-color);
+    position: relative;
+    align-items: center;
+    border-top: 0;
+}
+
+header h1 {
+    margin: 0;
+    height: fit-content;
+    margin-right: 20px;
+}
+
+.area {
+    display: flex;
+    gap: 1rem;
+    border-left: 2px solid var(--border-color);
+    border-right: 2px solid var(--border-color);
+    box-sizing: border-box;
+    padding: 10px;
+    margin-left: -1px;
+    margin-top: -1px;
+    position: relative;
+}
+
+.area div {
+    display: flex;
+    gap: 0.2rem;
+    flex-direction: column;
+}
+
+header .area span {
+    font-size: 14px;
+    color: rgb(163, 163, 163);
+}
+
+.area h5 {
+    margin: 0;
+}
+
+header .area .context-menu{
+    max-height: 0;
+    height: 600px;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    
+    z-index: 99;
+    
+    opacity: 0;
+    transition: max-height .3s, opacity 0s;
+   
+    
+
+}
+
+header .area .context-menu .content {
+    background-color: var(--button-color);
+    
+    border-radius: var(--border-radius);
+    opacity: 1;
+    border: var(--border-size) solid var(--border-color);
+    margin-left: -1px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    color: white;
+    overflow: hidden;
+    
+    gap: 5px;
+    padding: 5px;
+}
+
+
+header .area .context-menu button {
+   background-color: var(--button-color);
+   width: 100%;
+   text-wrap: nowrap;
+}
+
+header .area .context-menu button:has(.check) {
+    display: flex;
+    justify-content: space-between;
+}
+ 
+
+
+
+header .area .context-menu .check {
+    padding: 0;
+    color: #64666a;
+    background-color: white;
+    background: none;
+    transition: width 0.3s;
+    position: relative;
+
+}
+
+header .area .context-menu button svg {
+    background-color: #2a2424;
+    padding: 5px;
+    border-radius: var(--border-radius);
+    color: #747474;
+    
+   
+}
+
+header .area .context-menu .check {
+    opacity: 0;
+    transition: 0.2s;
+}
+
+header .area .context-menu .check svg {
+    background: none;
+    z-index: 10;
+    transition: 0.3s;
+}
+
+
+
+
+header .area .context-menu button:hover {
+    background-color: rgb(34, 30, 39) ;
+
+}
+
+header .area:hover .context-menu {
+    max-height: 500px;
+    opacity: 1;
+}
+
+
+header .area .context-menu button:hover .check, header .area .context-menu .selected .check {
+    /*color: var(--validate-color);*/
+    opacity: 1;
+}
+
+header .area .context-menu .selected .check svg {
+    color: var(--validate-color);
+}
+
+
+.context-menu .sep {
+    min-height: var(--border-size);
+    width: 100%;
+    background-color: var(--border-color);
+}

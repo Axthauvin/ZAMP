@@ -1,0 +1,35 @@
+{
+  "name": "blank-server-manager",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "author": "Axel Thauvin",
+  "license": "ISC",
+  "description": "Server manager app, to serve and manage PHP apps",
+  "devDependencies": {
+    "electron": "^30.0.6",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "electron-blog-example",
+    "dmg": {
+      "title": "${productName} ${version}"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "win": {
+      "target": "NSIS"
+    }
+  },
+  "dependencies": {
+    "node-powershell": "^5.0.1",
+    "electron-log": "^10.8.0"
+  }
+}

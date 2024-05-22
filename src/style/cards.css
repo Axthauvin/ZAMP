@@ -1,0 +1,124 @@
+
+
+.cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 2rem;
+}
+
+.card {
+    background-color: #1b1920;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    width: fit-content;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    position: relative;
+    transition: width 0.3s;
+    
+}
+.card .content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.card article {
+    width: fit-content;
+}
+
+.card .footer {
+    color: #64666a;
+}
+.card h3 {
+    margin: 0;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.card span {
+    font-size: 14px;
+}
+
+.card button, .item button{
+    padding: 0;
+    color: #64666a;
+    background-color: white;
+    background: none;
+    position: relative;
+    transition: width 0.3s;
+    opacity: 0;
+}
+
+.card button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translateX(50%) translateY(-25%);
+}
+
+
+.selected button, .card:hover button{
+    color: var(--validate-color) !important;
+    opacity: 1 !important;
+    transition: 0.3s;
+}
+
+.selected, .card:hover, .item:hover {
+    border-color: var(--validate-color);
+}
+
+
+.item:hover button {
+    color: #747474;
+    transform: scale(105%);
+    opacity: 1;
+}
+
+.card button svg, .item button svg {
+    z-index: 10;
+}
+
+.card button .background, .item button .background, .context-menu .check .background {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    left: 5px;
+    bottom: 5px;
+    background-color: white;
+    border-radius: 360px;
+}
+
+.context-menu .check .background {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    bottom: 10px;
+}
+
+.search {
+    display: flex;
+    border-radius: 0.6rem;
+    background-color: #1b1920;
+    color: #64666a;
+    align-items: center;
+    padding: 0.6rem;
+    width: 300px;
+}
+
+.search input {
+    background: none;
+    outline: none;
+    padding-left: 1rem;
+    border: none;
+    color: inherit;
+    font-family: 'Lato';
+    font-size: 1rem;
+}
+
+.search svg {
+    color: inherit;
+}
+
+
