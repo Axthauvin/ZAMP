@@ -81,6 +81,7 @@ header .area .context-menu button {
    background-color: var(--button-color);
    width: 100%;
    text-wrap: nowrap;
+   font-size: 14px;
 }
 
 header .area .context-menu button:has(.check) {

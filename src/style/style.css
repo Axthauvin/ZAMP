@@ -92,6 +92,10 @@ button {
     gap: 2rem;
 }
 
+.stopping {
+    background-color: #f6c05c !important;
+}
+
 .stop {
     background-color: #f65c5c !important;
 }

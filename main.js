@@ -1,7 +1,10 @@
 const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron')
-const { killserver, create_server, open_browser, change_www_path } = require('./src/apache-server/apache_config');
+const { killserver, create_server, open_browser, change_www_path, getApacheVersion } = require('./src/apache-server/apache_config');
+
 const { openFolderInEditor } = require('./src/main-app/start_apps');
 const { listApacheVersions } = require('./src/main-app/get_versions');
+const { writeAsJson } = require('./src/main-app/basic_functions');
+
 const { exec, execFile  } = require('child_process');
 const path = require('path');
 const log = require('electron-log');
@@ -11,18 +14,23 @@ const { info } = require('console');
 const phpVersionsPath = path.resolve(path.join(app.getAppPath(), "src", "php", 'versions.json'));
 
 const configPath = path.resolve(path.join(app.getAppPath(), "src", 'config.json'));
-const wwwPath = path.resolve(path.join(app.getAppPath(), "bin", "apache", "Apache24", 'htdocs'));
+const wwwPath = path.resolve(path.join(app.getAppPath(), "bin", "apache", 'htdocs'));
 
-const apacheVersionsFolder = path.resolve(path.join(app.getAppPath(), "bin", "apache"));
-const apacheVersionsPath = path.resolve(path.join(app.getAppPath(), "src", "apache-server", 'versions.json'));
 
-var apacheConfig = JSON.parse(fs.readFileSync(apacheVersionsPath, 'utf-8'));
+const apacheFolder = path.resolve(path.join(app.getAppPath(), "bin", "apache"));
+const apacheConfigFilePath = path.resolve(path.join(app.getAppPath(), "src", "apache-server", 'config.json'));
+
+var apacheConfig = JSON.parse(fs.readFileSync(apacheConfigFilePath, 'utf-8'));
 let selectedApacheVersion = apacheConfig.selected;
 
 var php_versions = JSON.parse(fs.readFileSync(phpVersionsPath, 'utf-8'));
 let php_current_version = path.resolve(php_versions[Object.keys(php_versions)[0]]);
 let php_folder_path = path.dirname(php_current_version);
 const phpIniFilePath = path.resolve(path.join(php_folder_path, "php.ini"));; // Replace with your actual php.ini file path
+const phpExtPath = path.resolve(path.join(php_folder_path, "ext"));; // Replace with your actual php.ini file path
+
+
+let serverRunning = false;
 
 
 var config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
@@ -81,26 +89,36 @@ const createWindow = () => {
 
   }
 
-  
-
-  app.whenReady().then(() => {
-    createWindow();
-
-    log.info('App was started');
+  async function startApp() {
+    var version = await getApacheVersion(app);
+    apacheConfig.version = version;
+    writeAsJson(apacheConfig, apacheConfigFilePath)
     
-    app.on('activate', () => {
-      if (BrowserWindow.getAllWindows().length === 0) createWindow()
+
+    app.whenReady().then(() => {
+      createWindow();
+
+      log.info('App was started');
+
+      load_project(currentProject);
+      
+      app.on('activate', () => {
+        if (BrowserWindow.getAllWindows().length === 0) createWindow()
+      })
     })
+
+  app.on('window-all-closed', () => {
+      async function terminate() {
+        await killserver(log, mainWindow);
+        if (process.platform !== 'darwin') app.quit();
+      }
+
+      terminate();
   })
+}
 
-app.on('window-all-closed', () => {
-    async function terminate() {
-      await killserver(log);
-      if (process.platform !== 'darwin') app.quit();
-    }
-
-    terminate();
-})
+startApp();
+  
 
 function openExplorer(targetPath) {
 
@@ -121,25 +139,26 @@ function openExplorer(targetPath) {
   }
 
   exec(command, (error) => {
-    if (error) {
+    /*if (error) {
       console.error('Error opening file explorer:', error);
     } else {
       console.log('File explorer opened successfully:', tpath);
-    }
+    }*/
   });
 }
 
 
 
 ipcMain.on('open', () => {
-
-  create_server(app, log, php_current_version);
+  serverRunning = true;
+  create_server(app, log, php_current_version, phpIniFilePath, phpExtPath, mainWindow);
 
 });
 
 ipcMain.on('close', () => {
     
-  killserver(log);
+  killserver(log, mainWindow);
+  serverRunning = false;
 
 });
 
@@ -163,17 +182,15 @@ ipcMain.on('editor', () => {
 
 });
 
-const writeAsJson = (dict, path) => {
-  jsonData = JSON.stringify(dict, null, 4);
 
-  fs.writeFile(path, jsonData, (err) => {
-    if (err) {
-      console.error('Error writing JSON file:', err);
-    }
-  });
-}
 
-function load_project(project_name) {
+async function load_project(project_name) {
+
+  var wasRunning = false;
+  if (project_name != currentProject && serverRunning) { // We have to check if the server is running and kill and restart
+      await killserver(log, mainWindow, true); // function will set serverRunning at false
+      wasRunning = true;
+  }
   
   currentProject = project_name;
   currentProjectPath = config.projects[currentProject].path
@@ -181,7 +198,10 @@ function load_project(project_name) {
   config.selected = currentProject;
   writeAsJson(config, configPath);
 
-  change_www_path(app, log, currentProjectPath)
+  change_www_path(app, log, currentProjectPath);
+
+  if (wasRunning)
+    create_server(app, log, php_current_version, phpIniFilePath, phpExtPath, mainWindow, true);
 }
 
 // Clear the directory
@@ -235,10 +255,11 @@ ipcMain.on('asynchronous-message', function (evt, messageObj) {
       case 'php-versions' : evt.sender.send('php-versions', php_versions); break;
       case 'currentProject' : evt.sender.send('currentProject', currentProject); break;
       case 'get-projects' : evt.sender.send('get-projects', projects); break;
-      case 'getApacheversions' : 
-      var versions = listApacheVersions(apacheVersionsFolder);
-      var tosend = {"versions" : versions, "selected" : selectedApacheVersion}
-      evt.sender.send('getApacheversions', tosend); break;    
+      case 'getApacheversion' : evt.sender.send('getApacheversion', apacheConfig); break;
+      case 'openApacheFolder' : openExplorer(apacheFolder); break;
+      break;
+      
+       
   }
 });
 
@@ -324,45 +345,18 @@ ipcMain.handle('open-folder-dialog', async (event) => {
     return null;
   } else {
     const folderPath = result.filePaths[0];
-    var tosend = {"path" : folderPath, "date" : getLastModifiedDate(folderPath)};
+    var lastmodified = getLastModifiedDate(folderPath);
+    add_project(folderPath, lastmodified);
+    var tosend = {"path" : folderPath, "date" : lastmodified};
     return tosend; // Return the selected folder path
   }
 });
 
-/*ipcMain.on('files-dropped', (event, files) => {
-  const folderPath = files.filePaths[0];
-  
-  var tosend = {"path" : folderPath, "date" : getLastModifiedDate(folderPath)};
-  log.info("geur");
-  var tosend = {"path" : null, "date" : null};
-
-  // PowerShell command to get the full path
-  const command = `powershell.exe -Command "(Get-Item -LiteralPath '${folderPath}').FullName"`;
-
-  exec(command, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error: ${error.message}`);
-      return;
-    }
-    if (stderr) {
-      console.error(`Stderr: ${stderr}`);
-      return;
-    }
-    const fullPath = stdout.trim();
-    console.log(`Full path: ${fullPath}`);
-
-    // Send the full path back to the renderer process
-    event.sender.send('full-path', fullPath);
-  });
-
-
-  
-  mainWindow.webContents.send("files-dropped", tosend);
-});*/
 
 ipcMain.on('folder-dropped', (event, folderPath) => {
-  console.log(folderPath);
-  var tosend = {"path" : folderPath, "date" : getLastModifiedDate(folderPath)};
+  var lastmodified = getLastModifiedDate(folderPath);
+  add_project(folderPath, lastmodified);
+  var tosend = {"path" : folderPath, "date" : lastmodified};
   mainWindow.webContents.send("folder-dropped", tosend);
   
 });
@@ -398,12 +392,12 @@ ipcMain.on('show-context-menu', (event, data ) => {
 
 function remove_project(name, sender) {
   delete config.projects[name];
-
-
   
   if (Object.keys(config.projects).length > 0) {
     if (name == currentProject) {
-      currentProject = config.projects[Object.keys(config.projects)[0]];
+      console.log(Object.keys(config.projects)[0]);
+      currentProject = Object.keys(config.projects)[0];
+      console.log("New selected project : " + currentProject);
       sender.send("select_project", currentProject);
       load_project(currentProject)
     }
@@ -417,10 +411,34 @@ function remove_project(name, sender) {
 
   writeAsJson(config, configPath);
   
-  log.info(config);
-  log.info(currentProject);
+}
 
-  
-  
+function add_project(folderPath, lastmodified) {
+  var name =  path.basename(folderPath);
+  config.projects[name] = {
+    "path": folderPath,
+    "ico": null,
+    "tags": [],
+    "last_edited": lastmodified
+  };
+
+  writeAsJson(config, configPath);
   
 }
+
+
+
+
+
+/*
+async function fetch_versions() {
+  var versions = await fetchAvailableVersions();
+  console.log(versions);
+  return versions;
+}
+
+
+
+var fetched = fetch_versions();
+console.log(fetched);
+download_apache_version("2.4.59", apacheVersionsFolder, apacheVersionsPath)*/

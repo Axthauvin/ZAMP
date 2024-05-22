@@ -4,21 +4,61 @@ const path = require('path');
 
 let apacheVersions;
 
+function openCloseServer(btn, status, send = true) {
+  switch (status) {
+    case "Start" :
+      
+    if (send)
+        ipcRenderer.send('open');
+      
+      btn.classList.add("stop");
+      btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" fill="currentColor"/></svg>Stop';
+      break;
+    
+    case "Stopping" : 
+      /*btn.classList.remove("stop");
+      btn.classList.add("closing");
+      btn.innerHTML = '<svg width="20" height="20" viewBox="128 128 256 256" data-name="Layer 1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"><path class="cls-1" d="M330.61,225.16,217,159.57c-23.74-13.71-53.41,3.42-53.41,30.84V321.59c0,27.42,29.67,44.55,53.41,30.84l113.61-65.59C354.35,273.13,354.35,238.87,330.61,225.16Z" fill="currentColor"/></svg>Closing';*/
+      break;
+    case "Stop" :
+      if (send)
+        ipcRenderer.send('close');
+      btn.classList.remove("stop");
+      btn.classList.add("stopping");
+      btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" fill="currentColor"/></svg>Stopping...';
+      break;
+  }
+}
+
+
+
 
 document.getElementById('open-close').addEventListener('click', (event) => {
   var btn = document.getElementById('open-close');
   var txt = btn.textContent.replace(/\s/g, '');
-  console.log(txt == "Start");
-  if (txt == "Start") {  // We have to stop the server
-    ipcRenderer.send('open');
-    btn.classList.add("stop");
-    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" fill="currentColor"/></svg>Stop';
-    
-  } else {
-    ipcRenderer.send('close');
-    btn.classList.remove("stop");
-    btn.innerHTML = '<svg width="20" height="20" viewBox="128 128 256 256" data-name="Layer 1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"><path class="cls-1" d="M330.61,225.16,217,159.57c-23.74-13.71-53.41,3.42-53.41,30.84V321.59c0,27.42,29.67,44.55,53.41,30.84l113.61-65.59C354.35,273.13,354.35,238.87,330.61,225.16Z" fill="currentColor"/></svg>Start';
-  }
+  openCloseServer(btn, txt);
+});
+
+
+// Recieve app name.
+ipcRenderer.on('closed', function (evt) {
+ 
+  var btn = document.getElementById('open-close');
+  btn.classList.remove("stopping");
+  btn.innerHTML = '<svg width="20" height="20" viewBox="128 128 256 256" data-name="Layer 1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"><path class="cls-1" d="M330.61,225.16,217,159.57c-23.74-13.71-53.41,3.42-53.41,30.84V321.59c0,27.42,29.67,44.55,53.41,30.84l113.61-65.59C354.35,273.13,354.35,238.87,330.61,225.16Z" fill="currentColor"/></svg>Start';
+});
+
+// Recieve app name.
+ipcRenderer.on('open', function (evt) {
+  var btn = document.getElementById('open-close');
+  openCloseServer(btn, "Start", false);
+});
+
+// Recieve app name.
+ipcRenderer.on('stopping', function (evt) {
+  var btn = document.getElementById('open-close');
+  var txt = btn.textContent.replace(/\s/g, '');
+  openCloseServer(btn, txt);
 });
 
 document.getElementById('reveal').addEventListener('click', (event) => {
@@ -168,6 +208,14 @@ function add_project(name, date) {
   
   let ca = generateCardHTML(name, date);
   document.getElementsByClassName("cards-container")[0].insertAdjacentHTML( 'beforeend', ca );
+
+  var card = document.getElementsByClassName("cards-container")[0].lastChild;
+  card.addEventListener('click', (event) => {
+    var name = {"name": card.getAttribute("name")};
+    ipcRenderer.send('select_project', name);
+    
+    select_new_project(name.name);
+  });
 }
 
 function remove_project(name) {
@@ -327,21 +375,33 @@ dropZone.addEventListener('dragleave', (event) => {
 });
 
 
+// When body is dragged, lets open the popup
+document.body.addEventListener('dragover', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  if (document.getElementById("add-project").style.display == "none") 
+    document.getElementById("add-project").style.display = "flex";
+});
 
 
-ipcRenderer.send('asynchronous-message', 'getApacheversions');
+
+
+
+ipcRenderer.send('asynchronous-message', 'getApacheversion');
 // Listen for context menu commands
-ipcRenderer.on('getApacheversions', (event, data) => {
-  var versions = data.versions;
-  var selected = data.selected;
+ipcRenderer.on('getApacheversion', (event, data) => {
+  var version = data.version;
+  var mode = data.mode;
+
   var versionsContainer = document.getElementById("apache-versions").getElementsByClassName("content")[0];
-  versions = versions.reverse();
+  var options = ["Online", "Offline"];
+  options = options.reverse();
   
-  for (var version of versions) {
+  for (var op of options) {
     var htmlButtonContent = `
-      ${version}
+      ${op}
       <div class="check">
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM16.0303 8.96967C16.3232 9.26256 16.3232 9.73744 16.0303 10.0303L11.0303 15.0303C10.7374 15.3232 10.2626 15.3232 9.96967 15.0303L7.96967 13.0303C7.67678 12.7374 7.67678 12.2626 7.96967 11.9697C8.26256 11.6768 8.73744 11.6768 9.03033 11.9697L10.5 13.4393L12.7348 11.2045L14.9697 8.96967C15.2626 8.67678 15.7374 8.67678 16.0303 8.96967Z" fill="currentColor"/>
         </svg>
         <div class="background"></div>
@@ -349,10 +409,16 @@ ipcRenderer.on('getApacheversions', (event, data) => {
     `
     var newBtn = document.createElement("button");
     newBtn.innerHTML = htmlButtonContent;
-    newBtn.className = (version == selected) ? "selected" : "";
+    newBtn.className = (op == mode) ? "selected" : "";
 
     versionsContainer.insertBefore(newBtn, versionsContainer.firstChild);
   };
 
-  document.getElementById("apache-version").textContent = selected;
+  document.getElementById("apache-version").textContent = version;
 });
+
+
+document.getElementById("open-apache-folder").addEventListener('click', (event) => {
+  ipcRenderer.send('asynchronous-message', 'openApacheFolder');
+});
+

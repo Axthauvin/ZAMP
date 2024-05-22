@@ -2,11 +2,12 @@ const path = require('path');
 const fs = require('fs').promises;
 const { exec } = require('child_process');
 const { PowerShell } = require('node-powershell');
+const { setExtensionDir } = require('../php/php_ini');
 
 
 let file_content;
 
-const apachePath = path.resolve("./bin/apache/Apache24/bin/httpd.exe");
+const apachePath = path.resolve("./bin/apache/bin/httpd.exe");
 
 const isRunning = (query, cb) => {
     let platform = process.platform;
@@ -26,8 +27,8 @@ async function updateApacheServerRoot(app, log) {
     const basepath = app.getAppPath();
 
     // Example usage:
-    const filePath = path.resolve(basepath, 'bin/apache/Apache24/conf/httpd.conf'); // Path to httpd.conf
-    const apachePath = path.resolve(basepath, 'bin/Apache24'); // Desired Apache path
+    const filePath = path.resolve(basepath, 'bin/apache/conf/httpd.conf'); // Path to httpd.conf
+    const apachePath = path.resolve(basepath, 'bin/apache'); // Desired Apache path
 
     log.info(basepath);
 
@@ -44,7 +45,11 @@ async function updateApacheServerRoot(app, log) {
     }
 }
 
-async function killserver(log) {
+async function killserver(log, mainWindow, send = false) {
+    if (send)
+        mainWindow.webContents.send('stopping');
+    
+    log.info(send);
 
     try {
         const ps = new PowerShell({
@@ -56,7 +61,14 @@ async function killserver(log) {
     
         await ps.invoke(command);
 
+        log.info(send);
+
+        mainWindow.webContents.send('closed');
+            
+
         log.info("Server was stopped");
+        
+        
 
     } catch {
 
@@ -69,7 +81,7 @@ async function killserver(log) {
 
 async function add_php_variable(app, log, php_path) {
     const basepath = app.getAppPath();
-    const filePath = path.resolve(basepath, 'bin/apache/Apache24/conf/httpd.conf'); // Path to httpd.conf
+    const filePath = path.resolve(basepath, 'bin/apache/conf/httpd.conf'); // Path to httpd.conf
 
     const php_folder_path = path.dirname(php_path);
 
@@ -102,7 +114,7 @@ async function add_php_variable(app, log, php_path) {
 async function change_www_path(app, log, newpath) {
 
     const basepath = app.getAppPath();
-    const filePath = path.resolve(basepath, 'bin/apache/Apache24/conf/httpd.conf'); // Path to httpd.conf
+    const filePath = path.resolve(basepath, 'bin/apache/conf/httpd.conf'); // Path to httpd.conf
     
     // Read the content of the .conf file
     const apacheConfContent = await fs.readFile(filePath, 'utf-8');
@@ -112,6 +124,8 @@ async function change_www_path(app, log, newpath) {
     .replace(/DocumentRoot\s+".*?"/g, `DocumentRoot "${newpath}"`)
     .replace(/<Directory\s+".*?">/g, `<Directory "${newpath}">`);
 
+    console.log("Changed document root to " + newpath);
+
     // Write the updated content back to the file
     await fs.writeFile(filePath, updatedConfContent, 'utf-8');
 }
@@ -120,7 +134,7 @@ async function change_www_path(app, log, newpath) {
 async function setDefaultIndex(app, log, page = "index.php") {
 
     const basepath = app.getAppPath();
-    const filePath = path.resolve(basepath, 'bin/apache/Apache24/conf/httpd.conf'); // Path to httpd.conf
+    const filePath = path.resolve(basepath, 'bin/apache/conf/httpd.conf'); // Path to httpd.conf
 
     try {
         let file_content = await fs.readFile(filePath, 'utf8');
@@ -136,19 +150,22 @@ async function setDefaultIndex(app, log, page = "index.php") {
     }
 }
 
-async function server_instantiate(app, log, php_version) {
+async function server_instantiate(app, log, php_version, phpIniPath, extPath) {
 
     await updateApacheServerRoot(app, log);     
     await add_php_variable(app, log, php_version);
     await setDefaultIndex(app, log);
+    setExtensionDir(phpIniPath, extPath);
 }
 
-function create_server(app, log, php_version) {
+function create_server(app, log, php_version, phpIniPath, extPath, mainWindow, send=false) {
     
     isRunning(apachePath, async (status) => {
         if (!status) {
-            await server_instantiate(app, log, php_version);
-    
+            await server_instantiate(app, log, php_version, phpIniPath, extPath);
+            
+            if (send)
+                mainWindow.webContents.send('open');
             // Start apache server
             const apacheProcess = exec(apachePath);
 
@@ -175,6 +192,30 @@ function open_browser(url="http://localhost") {
     require("electron").shell.openExternal(url);
 }
 
+async function getApacheVersion(app) {
+    const filePath = path.resolve(app.getAppPath(), 'bin/apache/CHANGES.TXT');
+    try {
+        // Read the content of the CHANGES.TXT file
+        const content = await fs.readFile(filePath, 'utf8');
+        
+        // Use regular expression to find the version number
+        const versionRegex = /Changelog-([0-9]+\.[0-9]+)/i;
+        const match = versionRegex.exec(content);
+        
+        // If a match is found, return the version number
+        if (match && match.length > 1) {
+            return match[1];
+        } else {
+            
+            return null;
+        }
+    } catch (err) {
+        // Handle any errors that occur during file reading or parsing
+        console.error('Error reading CHANGES.TXT:', err);
+        return 'Error';
+    }
+}
+
 /*
 
 module.exports.updateApacheServerRoot = updateApacheServerRoot
@@ -183,3 +224,4 @@ module.exports.killserver = killserver;
 module.exports.create_server = create_server
 module.exports.open_browser = open_browser
 module.exports.change_www_path = change_www_path
+module.exports.getApacheVersion = getApacheVersion

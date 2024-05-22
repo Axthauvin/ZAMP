@@ -1,11 +1,17 @@
 {
-    "selected": "crm",
+    "selected": "parcoursup-explorer",
     "projects": {
         "crm": {
             "path": "C:/Users/axtha/Documents/GitHub/crm",
             "ico": null,
             "tags": [],
             "last_edited": "20/04/2024"
+        },
+        "parcoursup-explorer": {
+            "path": "C:\\Users\\axtha\\Documents\\GitHub\\parcoursup-explorer",
+            "ico": null,
+            "tags": [],
+            "last_edited": "22/05/2024"
         }
     }
 }
