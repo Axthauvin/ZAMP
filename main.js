@@ -159,16 +159,15 @@ function openExplorer(targetPath) {
 
 
 ipcMain.on('open', () => {
-  log.info("test");
   serverRunning = true;
   if (currentProject)
-    create_server(app, log, php_current_version, phpIniFilePath, phpExtPath, mainWindow);
+    create_server(app, log, php_current_version, phpIniFilePath, phpExtPath, mainWindow, true);
 
 });
 
 ipcMain.on('close', () => {
     
-  killserver(log, mainWindow);
+  killserver(log, mainWindow, true);
   serverRunning = false;
 
 });
