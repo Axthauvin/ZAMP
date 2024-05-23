@@ -1,5 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron')
-const { killserver, create_server, open_browser, change_www_path, getApacheVersion } = require('./src/apache-server/apache_config');
+const { killserver, server_instantiate, create_server, open_browser, change_www_path, getApacheVersion } = require('./src/apache-server/apache_config');
+
+const { setPhPPaths } = require('./src/php/php_ini');
 
 const { openFolderInEditor } = require('./src/main-app/start_apps');
 const { listApacheVersions } = require('./src/main-app/get_versions');
@@ -21,14 +23,18 @@ const wwwPath = path.resolve(path.join(app.getAppPath(), "bin", "apache", 'htdoc
 const apacheFolder = path.resolve(path.join(app.getAppPath(), "bin", "apache"));
 const apacheConfigFilePath = path.resolve(path.join(app.getAppPath(), "src", "apache-server", 'config.json'));
 
-var apacheConfig = JSON.parse(fs.readFileSync(apacheConfigFilePath, 'utf-8'));
-let selectedApacheVersion = apacheConfig.selected;
 
-var php_versions = JSON.parse(fs.readFileSync(phpVersionsPath, 'utf-8'));
-let php_current_version = path.resolve(php_versions[Object.keys(php_versions)[0]]);
+
+var apacheConfig = JSON.parse(fs.readFileSync(apacheConfigFilePath, 'utf-8'));
+let php_versions = setPhPPaths(app, phpVersionsPath);
+
+let php_current_version = php_versions.paths[php_versions.selected].path;
 let php_folder_path = path.dirname(php_current_version);
-const phpIniFilePath = path.resolve(path.join(php_folder_path, "php.ini"));; // Replace with your actual php.ini file path
-const phpExtPath = path.resolve(path.join(php_folder_path, "ext"));; // Replace with your actual php.ini file path
+
+const phpIniFilePath = path.resolve(path.join(php_folder_path, "php.ini"));; 
+const phpExtPath = path.resolve(path.join(php_folder_path, "ext"));; 
+
+
 
 
 let serverRunning = false;
@@ -37,8 +43,6 @@ let serverRunning = false;
 var config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 var currentProject = config.selected;
 let currentProjectPath = config.projects[currentProject].path;
-log.info(currentProjectPath);
-
 
 function formatDate(date) {
   const day = String(date.getDate()).padStart(2, '0'); // Get day with leading zero if needed
@@ -96,10 +100,12 @@ const createWindow = () => {
     writeAsJson(apacheConfig, apacheConfigFilePath)
     
 
-    app.whenReady().then(() => {
+    app.whenReady().then(async () => {
       createWindow();
 
       log.info('App was started');
+
+      await server_instantiate(app, log, php_current_version, phpIniFilePath, phpExtPath);
 
       load_project(currentProject);
       
@@ -205,45 +211,10 @@ async function load_project(project_name) {
     create_server(app, log, php_current_version, phpIniFilePath, phpExtPath, mainWindow, true);
 }
 
-// Clear the directory
-const deleteContentsRecursive = (dir) => {
-  log.info(dir);
-  if (fs.existsSync(dir)) {
-    fs.readdirSync(dir).forEach((file) => {
-      const curPath = path.join(dir, file);
-
-      if (fs.lstatSync(curPath).isDirectory()) {
-        deleteContentsRecursive(curPath);
-        fs.rmdirSync(curPath); // Remove the now-empty subdirectory
-      } else {
-        fs.unlinkSync(curPath); // Delete file
-      }
-    });
-  }
-};
-
-// List all files and subfiles of the current directory
-const listFilesRecursive = (dir, fileList = []) => {
-  const files = fs.readdirSync(dir);
-
-  files.forEach((file) => {
-    const filePath = path.join(dir, file);
-    if (fs.lstatSync(filePath).isDirectory()) {
-      listFilesRecursive(filePath, fileList);
-    } else {
-      fileList.push(filePath);
-    }
-  });
-
-  return fileList;
-};
-
-
 
 
 ipcMain.on('select_project', (evt, name) => {
   var project_name = name.name;
-  log.info(project_name);
   load_project(project_name);
 
 });
@@ -299,7 +270,6 @@ const is_extension = (line) => {
 }
 
 function getExtensionsFromPhpIni() {
-  log.info(phpIniFilePath);
   const content = fs.readFileSync(phpIniFilePath, 'utf-8');
   const lines = content.split('\n');
   const extensions = lines.filter(line => is_extension(line)).map(line => {
@@ -397,7 +367,6 @@ function remove_project(name, sender) {
   
   if (Object.keys(config.projects).length > 0) {
     if (name == currentProject) {
-      console.log(Object.keys(config.projects)[0]);
       currentProject = Object.keys(config.projects)[0];
       console.log("New selected project : " + currentProject);
       sender.send("select_project", currentProject);

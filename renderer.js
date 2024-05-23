@@ -44,7 +44,8 @@ document.getElementById('open-close').addEventListener('click', (event) => {
 ipcRenderer.on('closed', function (evt) {
  
   var btn = document.getElementById('open-close');
-  btn.classList.remove("stopping");
+  if (btn.classList.contains("stopping"))
+    btn.classList.remove("stopping");
   btn.innerHTML = '<svg width="20" height="20" viewBox="128 128 256 256" data-name="Layer 1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"><path class="cls-1" d="M330.61,225.16,217,159.57c-23.74-13.71-53.41,3.42-53.41,30.84V321.59c0,27.42,29.67,44.55,53.41,30.84l113.61-65.59C354.35,273.13,354.35,238.87,330.61,225.16Z" fill="currentColor"/></svg>Start';
 });
 
