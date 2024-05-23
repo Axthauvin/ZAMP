@@ -2,7 +2,7 @@
     "selected": "php-8.3.4",
     "paths": {
         "php-8.3.4": {
-            "path": "C:\\Users\\axtha\\Documents\\GitHub\\ZAMP tests\\bin\\php\\php-8.3.4\\php8apache2_4.dll",
+            "path": "C:\\Users\\axtha\\Documents\\GitHub\\ZAMP\\bin\\php\\php-8.3.4\\php8apache2_4.dll",
             "apache_version": "2.4"
         }
     }
