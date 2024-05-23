@@ -1,5 +1,6 @@
 #ZAMP specific gitignore
 /src/config.json
+/bin/apache/conf/httpd.conf
 
 # Node.js dependencies
 node_modules/
