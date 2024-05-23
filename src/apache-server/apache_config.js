@@ -5,6 +5,7 @@ const { exec, execFile } = require('child_process');
 const { PowerShell } = require('node-powershell');
 const { setExtensionDir } = require('../php/php_ini');
 const { error } = require('console');
+const { writeAsJson } = require('../main-app/basic_functions');
 
 
 let file_content;
@@ -274,7 +275,23 @@ async function recreate_conf(app) {
     
     fs.writeFile(confFilePath, defaultContent);
 
+}
 
+function load_apache_config(apacheConfigFilePath) {
+    if (!fs1.existsSync(apacheConfigFilePath)) {
+
+        var content = {
+            "version": null,
+            "mode": "Offline"
+        }
+
+        writeAsJson(content, apacheConfigFilePath);
+
+        return content;
+
+    } else {
+        return JSON.parse(fs1.readFileSync(apacheConfigFilePath, 'utf-8'));
+    }
 }
 
 /*
@@ -287,3 +304,4 @@ module.exports.server_instantiate = server_instantiate
 module.exports.open_browser = open_browser
 module.exports.change_www_path = change_www_path
 module.exports.getApacheVersion = getApacheVersion
+module.exports.load_apache_config = load_apache_config

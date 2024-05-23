@@ -1,5 +1,5 @@
 const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron')
-const { killserver, server_instantiate, create_server, open_browser, change_www_path, getApacheVersion } = require('./src/apache-server/apache_config');
+const { killserver, server_instantiate, create_server, open_browser, change_www_path, getApacheVersion, load_apache_config } = require('./src/apache-server/apache_config');
 
 const { setPhPPaths } = require('./src/php/php_ini');
 
@@ -25,7 +25,7 @@ const apacheConfigFilePath = path.resolve(path.join(app.getAppPath(), "src", "ap
 
 
 
-var apacheConfig = JSON.parse(fs.readFileSync(apacheConfigFilePath, 'utf-8'));
+var apacheConfig = load_apache_config(apacheConfigFilePath);
 let php_versions = setPhPPaths(app, phpVersionsPath);
 
 let php_current_version = php_versions.paths[php_versions.selected].path;
@@ -314,6 +314,7 @@ ipcMain.on('manage-extensions', (event, arg) => {
 });
 
 
+
 ipcMain.handle('open-folder-dialog', async (event) => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ['openDirectory'],
@@ -335,7 +336,7 @@ ipcMain.handle('open-folder-dialog', async (event) => {
 ipcMain.on('folder-dropped', (event, folderPath) => {
   var lastmodified = getLastModifiedDate(folderPath);
   add_project(folderPath, lastmodified);
-  var tosend = {"path" : folderPath, "date" : lastmodified, "selected" : config.projects.length == 1};
+  var tosend = {"path" : folderPath, "date" : lastmodified, "selected" : Object.keys(config.projects).length == 1};
   mainWindow.webContents.send("folder-dropped", tosend);
   
 });

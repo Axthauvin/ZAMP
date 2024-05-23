@@ -4,10 +4,20 @@ const path = require("path");
 
 
 function setExtensionDir(phpIniFilePath, extPath) {
-  let content = fs.readFileSync(phpIniFilePath, 'utf-8');
+  let content;
+  if (!fs.existsSync(phpIniFilePath)) {
+    
+    content = fs.readFileSync(phpIniFilePath.replace("php.ini", "php.ini-development"), 'utf-8');
+
+  } else {
+    
+    content = fs.readFileSync(phpIniFilePath, 'utf-8');
+
+  }
+   
   const lines = content.split('\n');
   const updatedLines = lines.map(line => {
-    if (line.startsWith(`extension_dir`) || line == ';extension_dir = "ext"') {
+    if (line.startsWith(`extension_dir`) || line.startsWith(';extension_dir = "ext"')) {
       return `extension_dir = ${extPath}`;
     }
     return line;
@@ -18,8 +28,21 @@ function setExtensionDir(phpIniFilePath, extPath) {
 
 
 function setPhPPaths(app, phpConfigPaths) {
-  const PHPversionsPath = path.resolve(path.join(app.getAppPath(), "bin", "php"))
-  var PHPversions = JSON.parse(fs.readFileSync(phpConfigPaths, 'utf-8'));
+  const PHPversionsPath = path.resolve(path.join(app.getAppPath(), "bin", "php"));
+  
+  let PHPversions;
+  if (!fs.existsSync(phpConfigPaths)) {
+    
+    PHPversions = {
+      "selected": null,
+      "paths": {}
+    }
+    
+    writeAsJson(PHPversions, phpConfigPaths);
+  } else {
+    PHPversions = JSON.parse(fs.readFileSync(phpConfigPaths, 'utf-8'));
+  }
+
   PHPversions.paths = {};
   var versions = fs.readdirSync(PHPversionsPath);
   for (var version of versions) {
@@ -46,6 +69,10 @@ function setPhPPaths(app, phpConfigPaths) {
         console.log(`PHP version ${version} could not be load as there is no apache associated file.`);
       }
       
+  }
+
+  if (PHPversions.selected == null) {
+    PHPversions.selected = versions[0];
   }
 
   writeAsJson(PHPversions, phpConfigPaths);
