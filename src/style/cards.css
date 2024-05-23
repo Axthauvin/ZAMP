@@ -5,6 +5,7 @@
     flex-wrap: wrap;
     gap: 20px;
     margin-top: 2rem;
+    flex: 1;
 }
 
 .card {
@@ -16,6 +17,7 @@
     cursor: pointer;
     position: relative;
     transition: width 0.3s;
+    height: fit-content;
     
 }
 .card .content {
@@ -122,3 +124,34 @@
 }
 
 
+
+#empty {
+    width: 100%;
+    height: 100%;
+    display: none;
+    opacity: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+    
+}
+
+#empty:only-child {
+    display: flex;
+    opacity: 1;
+}
+
+#empty svg {
+    width: 42%;
+}
+
+#empty h3 {
+    margin: 10px;
+    font-size: 20px;
+}
+
+#empty p {
+    margin: 0;
+    font-size: 16px;
+}

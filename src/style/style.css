@@ -58,6 +58,8 @@ main #left {
 main #right {
     width: -webkit-fill-available;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
 button {
@@ -181,4 +183,3 @@ button {
     display: flex;
     justify-content: space-between;
 }
-

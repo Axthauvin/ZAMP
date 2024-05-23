@@ -5,7 +5,7 @@ const { setPhPPaths } = require('./src/php/php_ini');
 
 const { openFolderInEditor } = require('./src/main-app/start_apps');
 const { listApacheVersions } = require('./src/main-app/get_versions');
-const { writeAsJson } = require('./src/main-app/basic_functions');
+const { writeAsJson, getProjectPath, load_config } = require('./src/main-app/basic_functions');
 
 const { exec, execFile  } = require('child_process');
 const path = require('path');
@@ -40,9 +40,9 @@ const phpExtPath = path.resolve(path.join(php_folder_path, "ext"));;
 let serverRunning = false;
 
 
-var config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+var config = load_config(configPath);
 var currentProject = config.selected;
-let currentProjectPath = config.projects[currentProject].path;
+let currentProjectPath = getProjectPath(currentProject, config);
 
 function formatDate(date) {
   const day = String(date.getDate()).padStart(2, '0'); // Get day with leading zero if needed
@@ -107,11 +107,13 @@ const createWindow = () => {
 
       await server_instantiate(app, log, php_current_version, phpIniFilePath, phpExtPath);
 
-      load_project(currentProject);
+      await load_project(currentProject);
       
       app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
       })
+
+      console.log("---------------------")
     })
 
   app.on('window-all-closed', () => {
@@ -157,8 +159,10 @@ function openExplorer(targetPath) {
 
 
 ipcMain.on('open', () => {
+  log.info("test");
   serverRunning = true;
-  create_server(app, log, php_current_version, phpIniFilePath, phpExtPath, mainWindow);
+  if (currentProject)
+    create_server(app, log, php_current_version, phpIniFilePath, phpExtPath, mainWindow);
 
 });
 
@@ -193,6 +197,10 @@ ipcMain.on('editor', () => {
 
 async function load_project(project_name) {
 
+  if (project_name == null) {
+    return
+  }
+
   var wasRunning = false;
   if (project_name != currentProject && serverRunning) { // We have to check if the server is running and kill and restart
       await killserver(log, mainWindow, true); // function will set serverRunning at false
@@ -203,9 +211,9 @@ async function load_project(project_name) {
   currentProjectPath = config.projects[currentProject].path
 
   config.selected = currentProject;
-  writeAsJson(config, configPath);
+  await writeAsJson(config, configPath);
 
-  change_www_path(app, log, currentProjectPath);
+  await change_www_path(app, log, currentProjectPath);
 
   if (wasRunning)
     create_server(app, log, php_current_version, phpIniFilePath, phpExtPath, mainWindow, true);
@@ -319,7 +327,7 @@ ipcMain.handle('open-folder-dialog', async (event) => {
     const folderPath = result.filePaths[0];
     var lastmodified = getLastModifiedDate(folderPath);
     add_project(folderPath, lastmodified);
-    var tosend = {"path" : folderPath, "date" : lastmodified};
+    var tosend = {"path" : folderPath, "date" : lastmodified, "selected" : Object.keys(config.projects).length == 1};
     return tosend; // Return the selected folder path
   }
 });
@@ -328,7 +336,7 @@ ipcMain.handle('open-folder-dialog', async (event) => {
 ipcMain.on('folder-dropped', (event, folderPath) => {
   var lastmodified = getLastModifiedDate(folderPath);
   add_project(folderPath, lastmodified);
-  var tosend = {"path" : folderPath, "date" : lastmodified};
+  var tosend = {"path" : folderPath, "date" : lastmodified, "selected" : config.projects.length == 1};
   mainWindow.webContents.send("folder-dropped", tosend);
   
 });
@@ -375,6 +383,7 @@ function remove_project(name, sender) {
   }
   else {
     currentProject = null;
+    config.selected = currentProject;
     load_project(currentProject)
     sender.send("select_project", currentProject);
 
@@ -392,6 +401,14 @@ function add_project(folderPath, lastmodified) {
     "tags": [],
     "last_edited": lastmodified
   };
+
+  if (currentProject == null) {
+    currentProject = name;
+    config.selected = name;
+
+    load_project(name);
+  }
+    
 
   writeAsJson(config, configPath);
   

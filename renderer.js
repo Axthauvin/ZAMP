@@ -4,11 +4,24 @@ const path = require('path');
 
 let apacheVersions;
 
+function serverSender(status) {
+  switch (status) {
+    case "Start" :
+        ipcRenderer.send('open'); break;
+
+    case "Stop" :
+        ipcRenderer.send('close'); break;
+      
+  }
+
+  console.log(status);
+}
+
 function openCloseServer(btn, status, send = true) {
   switch (status) {
     case "Start" :
       
-    if (send)
+      if (send)
         ipcRenderer.send('open');
       
       btn.classList.add("stop");
@@ -36,7 +49,7 @@ function openCloseServer(btn, status, send = true) {
 document.getElementById('open-close').addEventListener('click', (event) => {
   var btn = document.getElementById('open-close');
   var txt = btn.textContent.replace(/\s/g, '');
-  openCloseServer(btn, txt);
+  serverSender(txt);
 });
 
 
@@ -205,12 +218,16 @@ function generateCardHTML(name, date, selected = false) {
     </div>`;
 }
 
-function add_project(name, date) {
+function add_project(name, date, selected = false) {
   
   let ca = generateCardHTML(name, date);
   document.getElementsByClassName("cards-container")[0].insertAdjacentHTML( 'beforeend', ca );
 
   var card = document.getElementsByClassName("cards-container")[0].lastChild;
+
+  if (selected)
+    select_new_project(name);
+  
   card.addEventListener('click', (event) => {
     var name = {"name": card.getAttribute("name")};
     ipcRenderer.send('select_project', name);
@@ -286,11 +303,12 @@ document.getElementById("add-project").style.display = "none";
 function load_folder(result) {
   const folderPath = result.path;
   const date = result.date
+  const selected = result.selected;
 
   if (folderPath) {
     
     const folderName = path.basename(folderPath);
-    add_project(folderName, date);
+    add_project(folderName, date, selected);
 
     close_popup(document.getElementById("add-project"));
     // You can update the UI or handle the folder path as needed
