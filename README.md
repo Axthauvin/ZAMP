@@ -1,3 +1,5 @@
+⚠️ *THE APP IS STILL UNDER DEVELOPPEMENT*
+
 ZAMP, is a new Electron-based application that simplifies the process of setting up and managing a local web development environment. 
 With ZAMP, you get a zero-configuration stack that includes Apache, MySQL, and PHP, all bundled into one user-friendly package.
 
@@ -12,4 +14,5 @@ With ZAMP, you get a zero-configuration stack that includes Apache, MySQL, and P
 # How to install 
 
 1. ```npm install``` to install all the dependencies (you need to install [node.js & NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
-2. ```npm start``` to start the app
+2. ```npm start``` to start the app (The app was only made for windows for now)
+
