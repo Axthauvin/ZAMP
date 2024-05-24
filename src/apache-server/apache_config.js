@@ -6,6 +6,12 @@ const { PowerShell } = require('node-powershell');
 const { setExtensionDir } = require('../php/php_ini');
 const { error } = require('console');
 const { writeAsJson } = require('../main-app/basic_functions');
+const util = require("util");
+
+
+
+
+
 
 
 let file_content;
@@ -27,6 +33,8 @@ const isRunning = (query, cb) => {
         cb(stdout.toLowerCase().indexOf(query.toLowerCase()) > -1);
     });
 }
+
+
 
 async function updateApacheServerRoot(app, log) {
     const basepath = app.getAppPath();
@@ -54,33 +62,87 @@ async function updateApacheServerRoot(app, log) {
     }
 }
 
+const execPromise = util.promisify(exec);
+
+async function get_task_list(callback) {
+    
+    let platform = process.platform;
+    let cmd = '';
+    switch (platform) {
+        case 'win32' : cmd = `tasklist`; break;
+        case 'darwin' : cmd = `ps -ax | grep ${query}`; break;
+        case 'linux' : cmd = `ps -A`; break;
+        default: break;
+    }
+    
+    const { stdout, stderr } = await execPromise(cmd);
+    
+    var httpdlines = stdout.toLowerCase().split("\n").filter(line => {
+        return line.includes("httpd.exe");
+    });
+
+    httpdlines = httpdlines.map(line => {
+        return line.split(" ").filter(l => {return l != ''});
+    })
+
+    var PIDS = httpdlines.map(line => {return parseInt(line[1])})
+
+    await callback(PIDS);
+
+    
+
+}
+
+
+
+
+async function killProcessesByPID() {
+
+    
+
+    await get_task_list(async function (PIDS) {
+
+        for (var pid of PIDS) {
+            try {
+                // Construct the PowerShell command to kill the process by PID
+                const command = `TASKKILL /F /PID ${pid}`;
+                const { stdout, stderr } = await execPromise(command);
+                if (stderr) {
+                    console.error(`Error: ${stderr}`);
+                }
+
+                //console.log(`Killed ${pid}`);
+
+            } catch (r) {
+                //console.log(`${pid} couldn't be killed`);
+            }  
+        }
+
+        
+        
+
+    });
+
+
+}
+
+
 async function killserver(log, mainWindow, send = false) {
+    
     if (send)
         mainWindow.webContents.send('stopping');
     
     try {
-        const ps = new PowerShell({
-            executionPolicy: 'Bypass',
-            noProfile: true
-        });
-    
-        const command = `TASKKILL /F /IM httpd.exe /T`;
-    
-        await ps.invoke(command);
+        
+        await killProcessesByPID();
+
+        log.info("Server was stopped");
 
         mainWindow.webContents.send('closed');
             
-
-        log.info("Server was stopped");
-        
-        
-
-    } catch {
-
+    } catch (err){
+        console.log(err);
     }
-    
-
-    
     
 }
 
@@ -188,14 +250,16 @@ async function server_instantiate(app, log, php_version, phpIniPath, extPath, re
     
 }
 
+
 function create_server(app, log, php_version, phpIniPath, extPath, mainWindow, send=false) {
     
-    function start_server(accsend) {
-        //await server_instantiate(app, log, php_version, phpIniPath, extPath);
+    async function start_server(accsend) {
         
         if (send || accsend)
             mainWindow.webContents.send('open');
         // Start apache server
+
+
         const apacheProcess = execFile(apachePath);
 
         log.info("Server was started");

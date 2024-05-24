@@ -34,6 +34,7 @@
     "decompress": "^4.2.1",
     "decompress-targz": "^4.1.1",
     "electron-log": "^5.1.4",
+    "node-cmd": "^5.0.0",
     "node-powershell": "^5.0.1"
   }
 }

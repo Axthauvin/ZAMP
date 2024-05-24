@@ -13,6 +13,8 @@ const log = require('electron-log');
 const fs = require('fs');
 const { info } = require('console');
 
+
+
 const phpFolder = path.resolve(path.join(app.getAppPath(), "bin", "php"));
 const phpVersionsPath = path.resolve(path.join(app.getAppPath(), "src", "php", 'versions.json'));
 
@@ -86,11 +88,26 @@ const createWindow = () => {
       },
       //autoHideMenuBar: true,
       
+    });
+
+    win.on('close', e => {
+
+     
+
+      if (serverRunning) {
+        
+        e.preventDefault();
+
+        win.webContents.send('close-but-running');
+      }
+      
     })
 
     mainWindow = win;
   
-    win.loadFile('index.html')
+    win.loadFile('index.html');
+
+    
 
   }
 
@@ -116,14 +133,9 @@ const createWindow = () => {
       console.log("---------------------")
     })
 
-  app.on('window-all-closed', () => {
-      async function terminate() {
-        await killserver(log, mainWindow);
-        if (process.platform !== 'darwin') app.quit();
-      }
 
-      terminate();
-  })
+
+  
 }
 
 startApp();
@@ -156,6 +168,17 @@ function openExplorer(targetPath) {
   });
 }
 
+ipcMain.on('close-app', () => {
+  async function terminate ()  {
+    
+    await killserver(log, mainWindow, true);
+    if (process.platform !== 'darwin') app.exit()
+  }
+
+  terminate();
+  
+
+});
 
 
 ipcMain.on('open', () => {
@@ -166,7 +189,6 @@ ipcMain.on('open', () => {
 });
 
 ipcMain.on('close', () => {
-    
   killserver(log, mainWindow, true);
   serverRunning = false;
 

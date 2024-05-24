@@ -72,7 +72,7 @@ ipcRenderer.on('open', function (evt) {
 ipcRenderer.on('stopping', function (evt) {
   var btn = document.getElementById('open-close');
   var txt = btn.textContent.replace(/\s/g, '');
-  openCloseServer(btn, txt);
+  openCloseServer(btn, txt, false);
 });
 
 document.getElementById('reveal').addEventListener('click', (event) => {
@@ -322,6 +322,24 @@ document.getElementById("select-folder").addEventListener("click", async () => {
   var result = await ipcRenderer.invoke('open-folder-dialog')
   load_folder(result);
 
+
+});
+
+ipcRenderer.on('close-but-running', function (evt, result) {
+
+  document.getElementById("close-but-server-running").style.display = "flex";
+
+});
+
+document.getElementById("cancel-close").addEventListener("click", async () => {
+
+  document.getElementById("close-but-server-running").style.display = "none";
+
+});
+
+document.getElementById("accept-close").addEventListener("click", async () => {
+
+  ipcRenderer.send("close-app")
 
 });
 
