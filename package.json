@@ -14,14 +14,11 @@
     "electron-builder": "^24.13.3"
   },
   "build": {
-    "appId": "axthau.zamp",
+    "appId": "axthauvin.zamp",
     "extraFiles": [
-      "./src/**/*"
-      
-    ],
-    "extraResources": [
       "./bin/**/*",
-      "./src/**/*"
+      "./src/**/*",
+      "!**/*.json"
     ],
     "extraMetadata": {
       "main": "./main.js"

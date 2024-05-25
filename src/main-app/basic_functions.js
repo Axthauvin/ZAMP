@@ -44,13 +44,13 @@ function load_config(configPath) {
 }
 
 
-function getAppPath(app, needressource) {
+function getAppPath(app) {
 
 
   var exePath = app.getPath('exe');
 
   if (path.basename(exePath) == "zamp.exe") { // to load resources folder if it is the exe
-    return path.resolve(path.join(path.dirname(exePath), "resources"));
+    return path.resolve(path.dirname(exePath));
   }
 
   return app.getAppPath();
