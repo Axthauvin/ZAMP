@@ -1,23 +1,21 @@
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron')
 const path = require('path');
 const fs1 = require('fs');
 const fs = require('fs').promises;
-const { exec, execFile } = require('child_process');
+const { exec, execFile, execFileSync } = require('child_process');
 const { PowerShell } = require('node-powershell');
 const { setExtensionDir } = require('../php/php_ini');
 const { error } = require('console');
-const { writeAsJson } = require('../main-app/basic_functions');
+const { writeAsJson, getAppPath } = require('../main-app/basic_functions');
 const util = require("util");
-
-
-
-
 
 
 
 let file_content;
 
-const apachePath = path.resolve("./bin/apache/bin/httpd.exe");
-console.log(apachePath);
+
+const apacheFolder = path.resolve(path.join(getAppPath(app), "bin", "apache", "bin"));
+const apachePath = path.resolve(path.join(apacheFolder, "httpd.exe"));
 const apacheExec = "httpd.exe"
 
 const isRunning = (query, cb) => {
@@ -37,7 +35,7 @@ const isRunning = (query, cb) => {
 
 
 async function updateApacheServerRoot(app, log) {
-    const basepath = app.getAppPath();
+    const basepath = getAppPath(app);
 
     // Example usage:
     const filePath = path.resolve(basepath, 'bin/apache/conf/httpd.conf'); // Path to httpd.conf
@@ -147,7 +145,7 @@ async function killserver(log, mainWindow, send = false) {
 }
 
 async function add_php_variable(app, log, php_path) {
-    const basepath = app.getAppPath().replaceAll(" ", "\ ");
+    const basepath = getAppPath(app).replaceAll(" ", "\ ");
     const filePath = path.resolve(basepath, 'bin/apache/conf/httpd.conf'); // Path to httpd.conf
 
     const php_exec_path = php_path;
@@ -182,7 +180,7 @@ async function add_php_variable(app, log, php_path) {
 async function change_www_path(app, log, newpath) {
 
     try {
-        const basepath = app.getAppPath().replaceAll(" ", "\ ");
+        const basepath = getAppPath(app).replaceAll(" ", "\ ");
         const filePath = path.resolve(basepath, 'bin/apache/conf/httpd.conf'); // Path to httpd.conf
         
         // Read the content of the .conf file
@@ -210,7 +208,7 @@ async function change_www_path(app, log, newpath) {
 
 async function setDefaultIndex(app, log, page = "index.php") {
 
-    const basepath = app.getAppPath().replaceAll(" ", "\ ");
+    const basepath = getAppPath(app).replaceAll(" ", "\ ");
     const filePath = path.resolve(basepath, 'bin/apache/conf/httpd.conf'); // Path to httpd.conf
 
     try {
@@ -259,20 +257,25 @@ function create_server(app, log, php_version, phpIniPath, extPath, mainWindow, s
             mainWindow.webContents.send('open');
         // Start apache server
 
+        console.log(apachePath);
 
-        const apacheProcess = execFile(apachePath);
-
+        const apacheProcess = execFile(apachePath, (error, stdout, stderr) => {
+            if (error) {
+                log.error(`Error executing Apache: ${error.message}`);
+                return;
+            }
+            if (stderr) {
+                log.error(`Apache stderr: ${stderr}`);
+            }
+            if (stdout) {
+                log.info(`Apache stdout: ${stdout}`);
+            }
+        });
+        
         log.info("Server was started");
 
-        apacheProcess.stdout.on('data', (data) => {
-            console.log(`Apache stdout: ${data}`);
-        });
 
         open_browser()
-
-        apacheProcess.stderr.on('data', (data) => {
-            console.error(`Apache stderr: ${data}`);
-        });
 
         /*apacheProcess.on('close', (code) => {
             console.log(`Apache process exited with code ${code}`);
@@ -300,7 +303,7 @@ function open_browser(url="http://localhost") {
 }
 
 async function getApacheVersion(app) {
-    const filePath = path.resolve(app.getAppPath().replaceAll(" ", "\ "), 'bin/apache/CHANGES.TXT');
+    const filePath = path.resolve(getAppPath(app).replaceAll(" ", "\ "), 'bin/apache/CHANGES.TXT');
     try {
         // Read the content of the CHANGES.TXT file
         const content = await fs.readFile(filePath, 'utf8');
@@ -331,7 +334,7 @@ async function recreate_conf(app) {
 
     */
 
-    const basepath = app.getAppPath().replaceAll(" ", "\ ");
+    const basepath = getAppPath(app).replaceAll(" ", "\ ");
     const confFilePath = path.resolve(basepath, 'bin/apache/conf/httpd.conf'); // Path to httpd.conf
     const defaultFilePath = path.resolve(basepath, 'bin/apache/conf/default_conf.conf'); // Path to default_conf.conf
 

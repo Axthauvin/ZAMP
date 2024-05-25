@@ -1,4 +1,7 @@
 const fs = require('fs');
+const path = require('path');
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron')
+
 
 async function writeAsJson (dict, path)  {
     jsonData = JSON.stringify(dict, null, 4);
@@ -40,6 +43,21 @@ function load_config(configPath) {
   }
 }
 
+
+function getAppPath(app, needressource) {
+
+
+  var exePath = app.getPath('exe');
+
+  if (path.basename(exePath) == "zamp.exe") { // to load resources folder if it is the exe
+    return path.resolve(path.join(path.dirname(exePath), "resources"));
+  }
+
+  return app.getAppPath();
+
+}
+
 module.exports.writeAsJson = writeAsJson;
 module.exports.getProjectPath = getProjectPath;
 module.exports.load_config = load_config;
+module.exports.getAppPath = getAppPath;

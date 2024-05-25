@@ -1,5 +1,5 @@
 const fs = require("fs");
-const {writeAsJson} = require("../main-app/basic_functions");
+const {writeAsJson, getAppPath} = require("../main-app/basic_functions");
 const path = require("path");
 
 
@@ -28,7 +28,7 @@ function setExtensionDir(phpIniFilePath, extPath) {
 
 
 function setPhPPaths(app, phpConfigPaths) {
-  const PHPversionsPath = path.resolve(path.join(app.getAppPath(), "bin", "php"));
+  const PHPversionsPath = path.resolve(path.join(getAppPath(app), "bin", "php"));
   
   let PHPversions;
   if (!fs.existsSync(phpConfigPaths)) {

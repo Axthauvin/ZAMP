@@ -1,11 +1,12 @@
 const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron')
+
 const { killserver, server_instantiate, create_server, open_browser, change_www_path, getApacheVersion, load_apache_config } = require('./src/apache-server/apache_config');
 
 const { setPhPPaths } = require('./src/php/php_ini');
 
 const { openFolderInEditor } = require('./src/main-app/start_apps');
 const { listApacheVersions } = require('./src/main-app/get_versions');
-const { writeAsJson, getProjectPath, load_config } = require('./src/main-app/basic_functions');
+const { writeAsJson, getProjectPath, load_config, getAppPath } = require('./src/main-app/basic_functions');
 
 const { exec, execFile  } = require('child_process');
 const path = require('path');
@@ -15,15 +16,21 @@ const { info } = require('console');
 
 
 
-const phpFolder = path.resolve(path.join(app.getAppPath(), "bin", "php"));
-const phpVersionsPath = path.resolve(path.join(app.getAppPath(), "src", "php", 'versions.json'));
-
-const configPath = path.resolve(path.join(app.getAppPath(), "src", 'config.json'));
-const wwwPath = path.resolve(path.join(app.getAppPath(), "bin", "apache", 'htdocs'));
 
 
-const apacheFolder = path.resolve(path.join(app.getAppPath(), "bin", "apache"));
-const apacheConfigFilePath = path.resolve(path.join(app.getAppPath(), "src", "apache-server", 'config.json'));
+
+const phpFolder = path.resolve(path.join(getAppPath(app), "bin", "php"));
+const phpVersionsPath = path.resolve(path.join(getAppPath(app), "src", "php", 'versions.json'));
+
+const configPath = path.resolve(path.join(getAppPath(app), "src", 'config.json'));
+
+console.log("Path : ", configPath);
+
+const wwwPath = path.resolve(path.join(getAppPath(app), "bin", "apache", 'htdocs'));
+
+
+const apacheFolder = path.resolve(path.join(getAppPath(app), "bin", "apache"));
+const apacheConfigFilePath = path.resolve(path.join(getAppPath(app), "src", "apache-server", 'config.json'));
 
 
 
@@ -35,7 +42,6 @@ let php_folder_path = path.dirname(php_current_version);
 
 const phpIniFilePath = path.resolve(path.join(php_folder_path, "php.ini"));; 
 const phpExtPath = path.resolve(path.join(php_folder_path, "ext"));; 
-
 
 
 
@@ -92,13 +98,13 @@ const createWindow = () => {
 
     win.on('close', e => {
 
-     
-
       if (serverRunning) {
         
         e.preventDefault();
 
         win.webContents.send('close-but-running');
+      } else {
+        if (process.platform !== 'darwin') app.exit()
       }
       
     })
@@ -176,7 +182,6 @@ ipcMain.on('close-app', () => {
   }
 
   terminate();
-  
 
 });
 
@@ -358,7 +363,7 @@ ipcMain.handle('open-folder-dialog', async (event) => {
 ipcMain.on('folder-dropped', (event, folderPath) => {
   var lastmodified = getLastModifiedDate(folderPath);
   add_project(folderPath, lastmodified);
-  var tosend = {"path" : folderPath, "date" : lastmodified, "selected" : Object.keys(config.projects).length == 1};
+  var tosend = {"path" : folderPath, "date" : lastmodified, "selected" : Object.keys(config.projects).length == 1, "config" : configPath};
   mainWindow.webContents.send("folder-dropped", tosend);
   
 });

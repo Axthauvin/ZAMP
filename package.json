@@ -1,5 +1,5 @@
 {
-  "name": "blank-server-manager",
+  "name": "zamp",
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
@@ -14,18 +14,17 @@
     "electron-builder": "^24.13.3"
   },
   "build": {
-    "appId": "electron-blog-example",
-    "dmg": {
-      "title": "${productName} ${version}"
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ]
-    },
-    "win": {
-      "target": "NSIS"
+    "appId": "axthau.zamp",
+    "extraFiles": [
+      "./src/**/*"
+      
+    ],
+    "extraResources": [
+      "./bin/**/*",
+      "./src/**/*"
+    ],
+    "extraMetadata": {
+      "main": "./main.js"
     }
   },
   "dependencies": {

@@ -305,6 +305,8 @@ function load_folder(result) {
   const date = result.date
   const selected = result.selected;
 
+  console.log(result.config);
+
   if (folderPath) {
     
     const folderName = path.basename(folderPath);
