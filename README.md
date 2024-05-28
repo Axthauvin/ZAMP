@@ -14,7 +14,12 @@
 
 ## Overview
 
-**ZAMP** is an all-in-one development stack for web developers that simplifies the setup of Apache, MySQL, and PHP. With **zero configuration required**, ZAMP allows you to focus on developing your application without worrying about server setup and maintenance.
+## Overview
+
+**ZAMP** is an all-in-one development stack for web developers, **providing everything you need** for ***local*** web development. It seamlessly integrates Apache, MySQL, and PHP, eliminating the need for individual installations.
+With **zero configuration required**, ZAMP streamlines your development process, allowing you to focus solely on building your application. Additionally, starting all services is as simple as a single click, enhancing your productivity and efficiency.
+
+
 
 ![Zamp with projects loaded](https://github.com/Axthauvin/ZAMP/assets/45522552/3df3e7be-abd8-46de-b367-5290393de405)
 
