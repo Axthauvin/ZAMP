@@ -2,9 +2,7 @@
 
 # ZAMP: Zero Configuration Apache MySQL PHP
 
-<div style="display: flex; justify-content: center">
-  <img src="./src/svg/fishy.svg" alt="ZAMP Logo">
-</div>
+<img align="center" src="./src/svg/fishy.svg" alt="ZAMP Logo">
 
 ## Overview
 
