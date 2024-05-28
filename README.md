@@ -1,10 +1,12 @@
+<div align="center">
+    <img align="center" src="./src/svg/fishy.svg" alt="ZAMP Logo">
+    <h1 style="margin-bottom: 0">ZAMP</h1>
+    <p >Zero Configuration Apache MySQL PHP</p>
+</div>
+
+---
+
 ⚠️ *THE APP IS STILL UNDER DEVELOPMENT*
-
-# ZAMP: Zero Configuration Apache MySQL PHP
-
-<p align="center">
-  <img align="center" src="./src/svg/fishy.svg" alt="ZAMP Logo">
-</p>
 
 
 ## Overview
