@@ -35,22 +35,28 @@ Currently, ZAMP is only available for Windows. We are actively working on making
 
 1. Download the latest [ZAMP for Windows](https://github.com/Axthauvin/ZAMP/releases/tag/Windows).
 2. Extract the archive to your preferred location.
-3. Run `start.exe`.
+3. Run `zamp.Setup.1.0.0.exe`.
 
 
 ## Usage
 
 Once installed, you can access the following services:
 
-- **Apache**: [http://localhost:8080](http://localhost:8080)
-- **PHPMyAdmin**: [http://localhost:8080/phpmyadmin](http://localhost:8080/phpmyadmin)
+- **Apache**: Clicking the start button 
+![Start button](./src/explanations/Startbutton.png)
 
-### Default Credentials
+- **PHPMyAdmin**: PHP will automatically configure itself within the app. 
+You can still change the version or the extensions using the dedicated areas.
+![PHP config](./src/explanations/PHPConfig.png)
 
-- **MySQL User**: root
-- **MySQL Password**: (leave blank)
+- **My SQL / Maria DB** : ZAMP uses MariaDB to run the SQL as it has binaries. MariaDB is retro compatible with MySQL, so you can still use workbench to access your server.
 
-## Help Improve `ZAMP`
+You can access the SQL server in the dedicated area
+
+![SQL buttons](./src/explanations/MYSQL.png)
+
+
+## Help Improve `ZAMP` 🐟🐠
 
 ### How to Install for Local Testing
 
