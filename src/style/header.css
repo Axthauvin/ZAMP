@@ -27,6 +27,7 @@ header h1 {
     margin-left: -1px;
     margin-top: -1px;
     position: relative;
+    align-items: center;
 }
 
 .area div {

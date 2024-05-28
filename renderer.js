@@ -427,6 +427,7 @@ document.body.addEventListener('dragover', (event) => {
 
 
 ipcRenderer.send('asynchronous-message', 'getApacheversion');
+
 // Listen for context menu commands
 ipcRenderer.on('getApacheversion', (event, data) => {
   var version = data.version;
@@ -466,3 +467,107 @@ document.getElementById("open-php-folder").addEventListener('click', (event) => 
   ipcRenderer.send('asynchronous-message', 'openPHPFolder');
 });
 
+
+ipcRenderer.send('asynchronous-message', 'getPhpVersions');
+
+// Listen for context menu commands
+ipcRenderer.on('getPhpVersions', (event, data) => {
+
+
+  let selected = data.selected;
+
+  var versionsContainer = document.getElementById("php-versions").getElementsByClassName("content")[0];
+  var versions = Object.keys(data.paths);
+  versions.reverse()
+  
+  for (var version of versions) {
+    var htmlButtonContent = `
+      ${version}
+      <div class="check">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM16.0303 8.96967C16.3232 9.26256 16.3232 9.73744 16.0303 10.0303L11.0303 15.0303C10.7374 15.3232 10.2626 15.3232 9.96967 15.0303L7.96967 13.0303C7.67678 12.7374 7.67678 12.2626 7.96967 11.9697C8.26256 11.6768 8.73744 11.6768 9.03033 11.9697L10.5 13.4393L12.7348 11.2045L14.9697 8.96967C15.2626 8.67678 15.7374 8.67678 16.0303 8.96967Z" fill="currentColor"/>
+        </svg>
+        <div class="background"></div>
+      </div>
+    `
+    var newBtn = document.createElement("button");
+    newBtn.innerHTML = htmlButtonContent;
+    newBtn.className = (version == selected) ? "selected" : "";
+
+    versionsContainer.insertBefore(newBtn, versionsContainer.firstChild);
+  };
+
+  document.getElementById("php-version").textContent = selected;
+});
+
+
+ipcRenderer.send('asynchronous-message', 'getMariaDBversion');
+
+// Listen for context menu commands
+ipcRenderer.on('getMariaDBversion', (event, data) => {
+  var version = data.version;
+  var status = data.status;
+
+
+  var versionsContainer = document.getElementById("sql-version").getElementsByClassName("content")[0];
+  var child = versionsContainer.firstElementChild;
+  while (child.className != "sep") {
+    versionsContainer.removeChild(child);
+    child = versionsContainer.firstElementChild;
+  }
+  
+  var options = ["Started", "Closed"];
+  var boolstatus = status == options[0];
+
+  options = options.reverse();
+  
+  for (var op of options) {
+    var htmlButtonContent = `
+      ${op}
+      <div class="check">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM16.0303 8.96967C16.3232 9.26256 16.3232 9.73744 16.0303 10.0303L11.0303 15.0303C10.7374 15.3232 10.2626 15.3232 9.96967 15.0303L7.96967 13.0303C7.67678 12.7374 7.67678 12.2626 7.96967 11.9697C8.26256 11.6768 8.73744 11.6768 9.03033 11.9697L10.5 13.4393L12.7348 11.2045L14.9697 8.96967C15.2626 8.67678 15.7374 8.67678 16.0303 8.96967Z" fill="currentColor"/>
+        </svg>
+        <div class="background"></div>
+      </div>
+    `
+    var newBtn = document.createElement("button");
+    newBtn.innerHTML = htmlButtonContent;
+    newBtn.className = (op == status) ? "selected" : "";
+
+    if (op == options[1]) {// Start server
+      
+      newBtn.addEventListener('click', (event) => {
+        ipcRenderer.send('SQL-Server', true);
+      });
+
+    } else {
+      
+      newBtn.addEventListener('click', (event) => {
+        ipcRenderer.send('SQL-Server', false);
+      });
+
+    }
+
+    versionsContainer.insertBefore(newBtn, versionsContainer.firstChild);
+  };
+
+  document.getElementById("sql-installed-version").getElementsByTagName("span")[0].textContent = version;
+
+  set_sql_server_status(boolstatus);
+});
+
+function set_sql_server_status(status) {
+  const status_info = document.getElementById("status-db");
+  if (status) {
+    status_info.textContent = "Online";
+    status_info.className = "open-sql";
+  } else {
+    status_info.textContent = "Offline";
+    status_info.className = "close-sql";
+  }
+}
+
+document.getElementById("open-SQL-folder").addEventListener('click', (event) => {
+  ipcRenderer.send('asynchronous-message', 'openSQLFolder');
+});

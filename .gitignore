@@ -1,8 +1,10 @@
 #ZAMP specific gitignore
 /src/config.json
 /src/php/versions.json
+/src/mariadb/config.json
 /src/apache-server/config.json
 /bin/apache/conf/httpd.conf
+/bin/mariadb/data/
 
 php.ini
 

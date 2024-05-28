@@ -183,3 +183,37 @@ button {
     display: flex;
     justify-content: space-between;
 }
+
+
+.svg-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+#sql-installed-version {
+    position: relative;
+}
+
+#status-db {
+    border-radius: 5px;
+    padding: 5px;
+    width: fit-content;
+    text-transform: uppercase;
+    font-size: 10px;
+    font-weight: bold;
+    height: fit-content;
+    
+    
+}
+
+.open-sql {
+    background-color: #384b56;
+    color: #69bf9e;
+}
+
+.close-sql {
+    background-color: #563838;
+    color: #bf6969;
+}

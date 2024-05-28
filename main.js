@@ -7,12 +7,16 @@ const { setPhPPaths } = require('./src/php/php_ini');
 const { openFolderInEditor } = require('./src/main-app/start_apps');
 const { listApacheVersions } = require('./src/main-app/get_versions');
 const { writeAsJson, getProjectPath, load_config, getAppPath } = require('./src/main-app/basic_functions');
+const { install_mariadb, start_mariadb, get_mariadb_version, load_maria_config, kill_maria_server } = require("./src/mariadb/db_init")
+
+
 
 const { exec, execFile  } = require('child_process');
 const path = require('path');
 const log = require('electron-log');
 const fs = require('fs');
 const { info } = require('console');
+
 
 
 
@@ -34,7 +38,7 @@ const apacheConfigFilePath = path.resolve(path.join(getAppPath(app), "src", "apa
 
 
 
-var apacheConfig = load_apache_config(apacheConfigFilePath);
+let apacheConfig = load_apache_config(apacheConfigFilePath);
 let php_versions = setPhPPaths(app, phpVersionsPath);
 
 let php_current_version = php_versions.paths[php_versions.selected].path;
@@ -43,6 +47,17 @@ let php_folder_path = path.dirname(php_current_version);
 const phpIniFilePath = path.resolve(path.join(php_folder_path, "php.ini"));; 
 const phpExtPath = path.resolve(path.join(php_folder_path, "ext"));; 
 
+
+const mariaDBFolder = path.resolve(path.join(getAppPath(app), "bin", "mariadb"));
+const mariaDB_version = get_mariadb_version(mariaDBFolder)
+const mariaDBFilePath = path.resolve(path.join(getAppPath(app), "src", "mariadb", 'config.json'));
+install_mariadb(mariaDBFolder);
+
+let SQLConfig = load_maria_config(mariaDBFilePath, mariaDB_version);
+
+if (SQLConfig.status != "Closed") {
+  start_mariadb(mariaDBFolder, SQLConfig, mariaDBFilePath);
+}
 
 
 let serverRunning = false;
@@ -262,11 +277,12 @@ ipcMain.on('asynchronous-message', function (evt, messageObj) {
       case 'currentProject' : evt.sender.send('currentProject', currentProject); break;
       case 'get-projects' : evt.sender.send('get-projects', projects); break;
       case 'getApacheversion' : evt.sender.send('getApacheversion', apacheConfig); break;
+      case 'getPhpVersions' : evt.sender.send('getPhpVersions', php_versions); break;
+      case 'getMariaDBversion' : evt.sender.send('getMariaDBversion', SQLConfig); break;
       case 'openApacheFolder' : openExplorer(apacheFolder); break;
       case 'openPHPFolder' : openExplorer(phpFolder); break;
+      case 'openSQLFolder' : openExplorer(mariaDBFolder); break;
       break;
-      
-       
   }
 });
 
@@ -457,3 +473,15 @@ async function fetch_versions() {
 var fetched = fetch_versions();
 console.log(fetched);
 download_apache_version("2.4.59", apacheVersionsFolder, apacheVersionsPath)*/
+
+
+ipcMain.on('SQL-Server', (event, status) => {
+  if (status) {
+    start_mariadb(mariaDBFolder, SQLConfig, mariaDBFilePath);
+  } else {
+    kill_maria_server(SQLConfig, mariaDBFilePath)
+  }
+
+
+  mainWindow.webContents.send('getMariaDBversion', SQLConfig);
+});
