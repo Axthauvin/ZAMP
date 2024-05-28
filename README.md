@@ -1,5 +1,5 @@
 <div align="center">
-    <img align="center" src="./src/svg/fishy.svg" alt="ZAMP Logo" width=400>
+    <img align="center" src="./src/svg/fishy.svg" alt="ZAMP Logo" width=300>
     <h1 style="margin-bottom: 0">ZAMP</h1>
 </div>
 
