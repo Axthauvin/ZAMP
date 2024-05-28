@@ -4,7 +4,7 @@
 </div>
 
 <div align="center">
-    <p>Zero Configuration Apache MySQL PHP</p>
+    <p style="margin-bottom: 50px">Zero Configuration Apache MySQL PHP</p>
 </div>
 
 
