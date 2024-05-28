@@ -2,7 +2,10 @@
 
 # ZAMP: Zero Configuration Apache MySQL PHP
 
-<img align="center" src="./src/svg/fishy.svg" alt="ZAMP Logo">
+<p align="center">
+  <img align="center" src="./src/svg/fishy.svg" alt="ZAMP Logo">
+</p>
+
 
 ## Overview
 
