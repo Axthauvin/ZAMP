@@ -30,22 +30,22 @@ const configPath = path.resolve(path.join(getAppPath(app), "src", 'config.json')
 
 console.log("Path : ", configPath);
 
-const wwwPath = path.resolve(path.join(getAppPath(app), "bin", "apache", 'htdocs'));
-
-
 const apacheFolder = path.resolve(path.join(getAppPath(app), "bin", "apache"));
 const apacheConfigFilePath = path.resolve(path.join(getAppPath(app), "src", "apache-server", 'config.json'));
-
 
 
 let apacheConfig = load_apache_config(apacheConfigFilePath);
 let php_versions = setPhPPaths(app, phpVersionsPath);
 
-let php_current_version = php_versions.paths[php_versions.selected].path;
-let php_folder_path = path.dirname(php_current_version);
 
-const phpIniFilePath = path.resolve(path.join(php_folder_path, "php.ini"));; 
-const phpExtPath = path.resolve(path.join(php_folder_path, "ext"));; 
+
+let php_current_version;
+let php_folder_path;
+
+let phpIniFilePath; 
+let phpExtPath; 
+
+load_php_version(php_versions.selected);
 
 
 const mariaDBFolder = path.resolve(path.join(getAppPath(app), "bin", "mariadb"));
@@ -299,6 +299,7 @@ function createPopupWindow() {
       nodeIntegration: true,
       contextIsolation: false,
     },
+    autoHideMenuBar: true
   });
 
   popupWindow.loadFile('./extensions.html');
@@ -485,3 +486,74 @@ ipcMain.on('SQL-Server', (event, status) => {
 
   mainWindow.webContents.send('getMariaDBversion', SQLConfig);
 });
+
+ipcMain.on('apache-online', (event, status) => {
+  if (status) {
+    apacheConfig.mode = "Online";
+  } else {
+    apacheConfig.mode = "Offline";
+  }
+
+  console.log("Apache server mode was changed");
+
+  writeAsJson(apacheConfig, apacheConfigFilePath);
+
+
+  mainWindow.webContents.send('getMariaDBversion', SQLConfig);
+});
+
+
+
+function load_php_version(version, write = false) {
+  
+  php_versions.selected = version;
+  
+  php_current_version = php_versions.paths[php_versions.selected].path;
+  php_folder_path = path.dirname(php_current_version);
+
+  phpIniFilePath = path.resolve(path.join(php_folder_path, "php.ini")); 
+  phpExtPath = path.resolve(path.join(php_folder_path, "ext"));
+
+  if (write) {
+    writeAsJson(php_versions, phpVersionsPath);
+  }
+}
+
+ipcMain.on('change-PHP-version', async (event, version) => {
+  
+  var wasRunning = serverRunning;
+  
+  if (serverRunning) {
+    await killserver(log, mainWindow, true);
+  }
+
+  load_php_version(version, true);
+  
+  console.log("PHP version was changed.");
+
+  if (wasRunning) {
+    server_instantiate(app, log, php_current_version, phpIniFilePath, phpExtPath);
+  }
+
+});
+
+
+ipcMain.handle('show-create-folder-dialog', async (event) => {
+  
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory'],
+  });
+
+  if (result.canceled) {
+    return null;
+  } else {
+    
+    const folderPath = result.filePaths[0];
+    var lastmodified = getLastModifiedDate(folderPath);
+    add_project(folderPath, lastmodified);
+    var tosend = {"path" : folderPath, "date" : lastmodified, "selected" : Object.keys(config.projects).length == 1};
+    return tosend; // Return the selected folder path
+  }
+
+});
+

@@ -204,6 +204,9 @@ button {
     font-size: 10px;
     font-weight: bold;
     height: fit-content;
+    width: 55px;
+    box-sizing: border-box;
+    text-align: center;
     
     
 }
@@ -217,3 +220,81 @@ button {
     background-color: #563838;
     color: #bf6969;
 }
+
+
+.toggle-container {
+    
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-direction: row !important;
+    justify-content: space-between;
+}
+
+.toggle {
+    background-color: #d0cfd4 ;
+    border-radius: 360px;
+    padding: 5px 6px;
+    width: fit-content;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex;
+    transition: 0.3s;
+    align-items: center;
+    width: 60px;
+    /*justify-content: flex-end;*/
+    position: relative;
+    height: 30px;
+}
+
+.toggle svg {
+    background: none !important;
+    padding: 0 !important;
+}
+
+
+
+.toggle .handle {
+    border-radius: 360px;
+    box-sizing: border-box;
+    color: white;
+    
+    transition: 0.3s;
+    position: absolute;
+    top: 5px;
+    left: 6px;
+    
+}
+
+
+.toggle[status="unactivate"] .handle {
+    color: white;
+}
+
+
+.toggle[status="activate"] .handle{
+    transform: translateX(-100%);
+    left: calc(100% - 6px);
+    color: white;
+}
+
+
+
+
+
+
+.toggle[status="activate"] {
+    background-color: #57ba60;
+}
+
+
+
+
+
+
+.toggle .handle {
+    transform: scale(105%);
+}
+
+
+

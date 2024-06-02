@@ -80,6 +80,12 @@ function setPhPPaths(app, phpConfigPaths) {
   return PHPversions;
 }
 
+function load_php_version(version) {
+  
+}
+
+
+
 
 module.exports.setExtensionDir = setExtensionDir
 module.exports.setPhPPaths = setPhPPaths;

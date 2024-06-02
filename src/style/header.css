@@ -47,7 +47,7 @@ header .area span {
 
 header .area .context-menu{
     max-height: 0;
-    height: 600px;
+    height: fit-content;
     position: absolute;
     left: 0;
     top: 100%;

@@ -5,6 +5,7 @@
 /src/apache-server/config.json
 /bin/apache/conf/httpd.conf
 /bin/mariadb/data/
+/bin/*
 
 php.ini
 

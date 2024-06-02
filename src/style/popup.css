@@ -182,7 +182,13 @@
 #accept-close{
     border: 2px solid var(--buttons-color);
     background-color: var(--buttons-color);
+    transition: 0.2s;
     width: 100%;
+} 
+
+#accept-close:hover{
+    color: var(--buttons-color);
+    background: none;
 } 
 
 

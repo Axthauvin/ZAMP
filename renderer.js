@@ -1,5 +1,32 @@
+
+
+
+
 const { ipcRenderer } = require('electron');
 const path = require('path');
+
+
+/*
+var original_toggle = document.getElementById("startSQL-toggle").getElementsByTagName("path")[0].getAttribute("d");
+
+document.getElementById("startSQL-toggle").addEventListener('mouseover', (event) => {
+  var tgl = document.getElementById("startSQL-toggle");
+  var svg = tgl.getElementsByTagName("svg")[0];
+  if (tgl.getAttribute("status") == "unactivate") {
+    svg.firstElementChild.setAttribute("d", "M330.61,225.16,217,159.57c-23.74-13.71-53.41,3.42-53.41,30.84V321.59c0,27.42,29.67,44.55,53.41,30.84l113.61-65.59C354.35,273.13,354.35,238.87,330.61,225.16Z");
+    
+  } 
+});
+
+
+
+document.getElementById("startSQL-toggle").addEventListener('mouseout', (event) => {
+  var tgl = document.getElementById("startSQL-toggle");
+  var svg = tgl.getElementsByTagName("svg")[0];
+  svg.firstElementChild.setAttribute("d", original_toggle);
+
+});*/
+
 
 
 let apacheVersions;
@@ -110,7 +137,7 @@ document.getElementById("search").addEventListener("input", (event) => {
     
     var c = element.textContent.replace(/\//g, '\\');
     console.log(c);
-    if (c.includes(val)) {
+    if (c.includes(val) && element.id != "empty") {
       element.style.display = "block";
     } else {
       element.style.display = "none";
@@ -433,26 +460,9 @@ ipcRenderer.on('getApacheversion', (event, data) => {
   var version = data.version;
   var mode = data.mode;
 
-  var versionsContainer = document.getElementById("apache-versions").getElementsByClassName("content")[0];
-  var options = ["Online", "Offline"];
-  options = options.reverse();
-  
-  for (var op of options) {
-    var htmlButtonContent = `
-      ${op}
-      <div class="check">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM16.0303 8.96967C16.3232 9.26256 16.3232 9.73744 16.0303 10.0303L11.0303 15.0303C10.7374 15.3232 10.2626 15.3232 9.96967 15.0303L7.96967 13.0303C7.67678 12.7374 7.67678 12.2626 7.96967 11.9697C8.26256 11.6768 8.73744 11.6768 9.03033 11.9697L10.5 13.4393L12.7348 11.2045L14.9697 8.96967C15.2626 8.67678 15.7374 8.67678 16.0303 8.96967Z" fill="currentColor"/>
-        </svg>
-        <div class="background"></div>
-      </div>
-    `
-    var newBtn = document.createElement("button");
-    newBtn.innerHTML = htmlButtonContent;
-    newBtn.className = (op == mode) ? "selected" : "";
+  var boolstatus = mode == "Online";
 
-    versionsContainer.insertBefore(newBtn, versionsContainer.firstChild);
-  };
+  document.getElementById("apache-lan-toggle").setAttribute("status", (boolstatus) ? "activate" : "unactivate");
 
   document.getElementById("apache-version").textContent = version;
 });
@@ -480,7 +490,7 @@ ipcRenderer.on('getPhpVersions', (event, data) => {
   var versions = Object.keys(data.paths);
   versions.reverse()
   
-  for (var version of versions) {
+  for (let version of versions) {
     var htmlButtonContent = `
       ${version}
       <div class="check">
@@ -490,9 +500,18 @@ ipcRenderer.on('getPhpVersions', (event, data) => {
         <div class="background"></div>
       </div>
     `
-    var newBtn = document.createElement("button");
+    let newBtn = document.createElement("button");
     newBtn.innerHTML = htmlButtonContent;
     newBtn.className = (version == selected) ? "selected" : "";
+
+    newBtn.addEventListener("click", () => {
+      ipcRenderer.send('change-PHP-version', version);
+      var par = newBtn.parentElement;
+      var btntoremove = par.getElementsByClassName("selected")[0]
+      btntoremove.className = "";
+      newBtn.className = "selected";
+      
+    });
 
     versionsContainer.insertBefore(newBtn, versionsContainer.firstChild);
   };
@@ -503,59 +522,55 @@ ipcRenderer.on('getPhpVersions', (event, data) => {
 
 ipcRenderer.send('asynchronous-message', 'getMariaDBversion');
 
+
+function toggle_listener(clickable, toggle) {
+  
+  clickable.addEventListener("click", () => {
+    
+    if (toggle.getAttribute("status") == "activate") {
+      toggle.setAttribute("status", "unactivate");
+
+    } else {
+      toggle.setAttribute("status", "activate");
+    }
+
+    var msg = toggle.getAttribute("message");
+    ipcRenderer.send(msg, toggle.getAttribute("status") == "activate");
+
+  });
+}
+
+for (let toggle of document.getElementsByClassName("toggle")) {
+  
+
+  let clickable = toggle;
+
+
+  if (toggle.parentElement.tagName.toLowerCase() == "button") {
+    clickable = toggle.parentElement;
+  }
+
+  toggle_listener(clickable, toggle);
+}
+
+
+
 // Listen for context menu commands
 ipcRenderer.on('getMariaDBversion', (event, data) => {
   var version = data.version;
   var status = data.status;
 
+  var boolstatus = status == "Started";
 
-  var versionsContainer = document.getElementById("sql-version").getElementsByClassName("content")[0];
-  var child = versionsContainer.firstElementChild;
-  while (child.className != "sep") {
-    versionsContainer.removeChild(child);
-    child = versionsContainer.firstElementChild;
-  }
-  
-  var options = ["Started", "Closed"];
-  var boolstatus = status == options[0];
-
-  options = options.reverse();
-  
-  for (var op of options) {
-    var htmlButtonContent = `
-      ${op}
-      <div class="check">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM16.0303 8.96967C16.3232 9.26256 16.3232 9.73744 16.0303 10.0303L11.0303 15.0303C10.7374 15.3232 10.2626 15.3232 9.96967 15.0303L7.96967 13.0303C7.67678 12.7374 7.67678 12.2626 7.96967 11.9697C8.26256 11.6768 8.73744 11.6768 9.03033 11.9697L10.5 13.4393L12.7348 11.2045L14.9697 8.96967C15.2626 8.67678 15.7374 8.67678 16.0303 8.96967Z" fill="currentColor"/>
-        </svg>
-        <div class="background"></div>
-      </div>
-    `
-    var newBtn = document.createElement("button");
-    newBtn.innerHTML = htmlButtonContent;
-    newBtn.className = (op == status) ? "selected" : "";
-
-    if (op == options[1]) {// Start server
-      
-      newBtn.addEventListener('click', (event) => {
-        ipcRenderer.send('SQL-Server', true);
-      });
-
-    } else {
-      
-      newBtn.addEventListener('click', (event) => {
-        ipcRenderer.send('SQL-Server', false);
-      });
-
-    }
-
-    versionsContainer.insertBefore(newBtn, versionsContainer.firstChild);
-  };
+  document.getElementById("startSQL-toggle").setAttribute("status", (boolstatus) ? "activate" : "unactivate");
 
   document.getElementById("sql-installed-version").getElementsByTagName("span")[0].textContent = version;
 
+
+
   set_sql_server_status(boolstatus);
 });
+
 
 function set_sql_server_status(status) {
   const status_info = document.getElementById("status-db");
@@ -570,4 +585,11 @@ function set_sql_server_status(status) {
 
 document.getElementById("open-SQL-folder").addEventListener('click', (event) => {
   ipcRenderer.send('asynchronous-message', 'openSQLFolder');
+});
+
+
+
+document.getElementById('create-new').addEventListener('click', async () => {
+  const result = await ipcRenderer.invoke('show-create-folder-dialog');
+  load_folder(result);
 });
