@@ -36,7 +36,7 @@ Currently, ZAMP is only available for Windows. We are actively working on making
 
 ### Windows
 
-1. Download the latest [ZAMP for Windows](https://github.com/Axthauvin/ZAMP/releases/tag/Windows).
+1. Download the latest [ZAMP for Windows](https://github.com/Axthauvin/ZAMP/releases/download/Windows-0.0.2/zamp.Setup.0.1.2.exe).
 2. Extract the archive to your preferred location.
 3. Run `zamp.Setup.1.0.0.exe`.
 
