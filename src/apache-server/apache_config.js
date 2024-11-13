@@ -1,4 +1,5 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
+const { listApacheVersions, fetchApacheVersions } = require('../main-app/get_versions');
 const path = require('path');
 const fs1 = require('fs');
 const fs = require('fs').promises;
@@ -8,6 +9,7 @@ const { setExtensionDir } = require('../php/php_ini');
 const { error } = require('console');
 const { writeAsJson, getAppPath } = require('../main-app/basic_functions');
 const util = require("util");
+
 
 
 
@@ -344,8 +346,16 @@ async function recreate_conf(app) {
 
 }
 
-function load_apache_config(apacheConfigFilePath) {
+async function load_apache_config(apacheConfigFilePath) {
+
+    var versions = await fetchApacheVersions();
+    console.log(versions);
+    console.log("caca");
+
     if (!fs1.existsSync(apacheConfigFilePath)) {
+
+        // Apache is not installed
+        
 
         var content = {
             "version": null,

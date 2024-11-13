@@ -97,6 +97,7 @@ for (var key of Object.keys(projects)) {
 let mainWindow;
 
 const createWindow = () => {
+  console.log( path.resolve(path.join(getAppPath(app), "src", "images", "fishy.png")))
     const win = new BrowserWindow({
       width: 1000,
       height: 700,
@@ -107,7 +108,9 @@ const createWindow = () => {
         contextIsolation: false,    // Disable context isolation
         enableRemoteModule: false,       
       },
-      //autoHideMenuBar: true,
+      icon:  path.resolve(path.join(getAppPath(app), "src", "images", "fishy.png")),
+      autoHideMenuBar: true,
+      //frame: false 
       
     });
 
@@ -299,6 +302,7 @@ function createPopupWindow() {
       nodeIntegration: true,
       contextIsolation: false,
     },
+    icon: path.resolve(path.join(getAppPath(app), "src", "svg", "fishy.svg")),
     autoHideMenuBar: true
   });
 

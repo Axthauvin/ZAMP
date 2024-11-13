@@ -4,29 +4,32 @@ header {
     box-sizing: border-box;
     display: flex;
     width: 100%;
+    border: 2px solid var(--border-color);
     position: relative;
     align-items: center;
     border-top: 0;
     justify-content: space-between;
-    padding: var(--nav-padding);
+    height: 60px;
 }
 
 .config-menu {
     display: flex;
     align-items: center;
     height: 100%;
-    width: 100%;
 }
 
-.menu h1 {
+header h1 {
     margin: 0;
     height: fit-content;
-    width: calc(var(--nav-width) - var(--nav-padding));
+    margin-right: 20px;
+    margin-left: 20px;
 }
 
 .area {
     display: flex;
     gap: 1rem;
+    border-left: 2px solid var(--border-color);
+    border-right: 2px solid var(--border-color);
     box-sizing: border-box;
     padding: 10px;
     margin-left: -1px;
@@ -41,7 +44,7 @@ header {
     flex-direction: column;
 }
 
-.menu .area span {
+header .area span {
     font-size: 14px;
     color: rgb(163, 163, 163);
 }
@@ -50,13 +53,12 @@ header {
     margin: 0;
 }
 
-.menu .area .context-menu{
+header .area .context-menu{
     max-height: 0;
     height: fit-content;
     position: absolute;
-    
-    left: 100%;
-    top: 0;
+    left: 0;
+    top: 100%;
     
     z-index: 99;
     
@@ -67,7 +69,7 @@ header {
 
 }
 
-.menu .area .context-menu .content {
+header .area .context-menu .content {
     background-color: var(--button-color);
     
     border-radius: var(--border-radius);
@@ -85,14 +87,14 @@ header {
 }
 
 
-.menu .area .context-menu button {
+header .area .context-menu button {
    background-color: var(--button-color);
    width: 100%;
    text-wrap: nowrap;
    font-size: 14px;
 }
 
-.menu .area .context-menu button:has(.check) {
+header .area .context-menu button:has(.check) {
     display: flex;
     justify-content: space-between;
 }
@@ -100,7 +102,7 @@ header {
 
 
 
-.menu .area .context-menu .check {
+header .area .context-menu .check {
     padding: 0;
     color: #64666a;
     background-color: white;
@@ -110,7 +112,7 @@ header {
 
 }
 
-.menu .area .context-menu button svg {
+header .area .context-menu button svg {
     background-color: #2a2424;
     padding: 5px;
     border-radius: var(--border-radius);
@@ -119,12 +121,12 @@ header {
    
 }
 
-.menu .area .context-menu .check {
+header .area .context-menu .check {
     opacity: 0;
     transition: 0.2s;
 }
 
-.menu .area .context-menu .check svg {
+header .area .context-menu .check svg {
     background: none;
     z-index: 10;
     transition: 0.3s;
@@ -133,23 +135,23 @@ header {
 
 
 
-.menu .area .context-menu button:hover {
+header .area .context-menu button:hover {
     background-color: rgb(34, 30, 39) ;
 
 }
 
-.menu .area:hover .context-menu {
+header .area:hover .context-menu {
     max-height: 500px;
     opacity: 1;
 }
 
 
-.menu .area .context-menu button:hover .check, .menu .area .context-menu .selected .check {
+header .area .context-menu button:hover .check, header .area .context-menu .selected .check {
     /*color: var(--validate-color);*/
     opacity: 1;
 }
 
-.menu .area .context-menu .selected .check svg {
+header .area .context-menu .selected .check svg {
     color: var(--validate-color);
 }
 

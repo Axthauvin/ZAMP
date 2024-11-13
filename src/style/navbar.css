@@ -1,0 +1,16 @@
+nav  {
+    background-color: #1b1920;
+    height: 100%;
+    width: var(--nav-width);
+    padding: var(--nav-padding);
+    box-sizing: border-box;
+}
+
+nav .title-nav {
+    font-size: 14px !important;
+}
+
+.search {
+    border: 2px solid var(--border-color);
+    width: 50%;
+}

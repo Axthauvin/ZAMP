@@ -8,8 +8,6 @@
     --validate-color: #03c988;
     --buttons-color: #8b5cf6; 
     --selected-color: #1b1920;
-    --nav-width : 300px;
-    --nav-padding : 40px;
 }
 
 @font-face {
@@ -29,13 +27,10 @@ body {
     color: white;
     margin: 0;
     font-family: 'Lato';
-    height: 100vh;
-    display: flex;
-    flex-wrap: wrap;
 }
 
 
-.main-content {
+main {
     padding: 3rem;
     display: flex;
     margin-right: 0rem;

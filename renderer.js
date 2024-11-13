@@ -564,7 +564,7 @@ ipcRenderer.on('getMariaDBversion', (event, data) => {
 
   document.getElementById("startSQL-toggle").setAttribute("status", (boolstatus) ? "activate" : "unactivate");
 
-  document.getElementById("sql-installed-version").getElementsByTagName("span")[0].textContent = version;
+  document.getElementById("sql-installed-version").textContent = version;
 
 
 

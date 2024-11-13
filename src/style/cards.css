@@ -117,6 +117,8 @@
     color: inherit;
     font-family: 'Lato';
     font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .search svg {

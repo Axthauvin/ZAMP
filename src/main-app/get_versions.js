@@ -1,6 +1,10 @@
 const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
+const cheerio = require('cheerio');
+
+
 
 /**
  * List all Apache versions installed in the bin/apache directory.
@@ -27,4 +31,40 @@ function listApacheVersions(apacheDir) {
     }
 }
 
-module.exports = { listApacheVersions };
+
+// Function to fetch Apache Windows binaries
+async function fetchApacheVersions() {
+  const url = 'https://www.apachelounge.com/download/';
+
+  return await new Promise(async (resolve, reject) => {
+    
+    await https.get(url, (response) => {
+      let data = '';
+
+      response.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      response.on('end', () => {
+        const $ = cheerio.load(data);
+        const links = [];
+
+        // Extracting download links
+        $('a').each((index, element) => {
+          const href = $(element).attr('href');
+          if (href && href.includes('httpd-') && href.endsWith('.zip')) {
+            links.push(`https://www.apachelounge.com${href}`);
+          }
+        });
+
+
+        resolve(links);
+      });
+    }).on('error', (err) => {
+      reject(err.message);
+    });
+  });
+}
+
+
+module.exports = { listApacheVersions, fetchApacheVersions };

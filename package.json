@@ -7,7 +7,7 @@
     "dist": "electron-builder"
   },
   "author": "Axel Thauvin",
-  "license": "ISC",
+  "license": "MIT",
   "description": "Server manager app, to serve and manage PHP apps",
   "devDependencies": {
     "electron": "^30.0.9",
